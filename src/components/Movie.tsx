@@ -6,6 +6,7 @@ interface movieProps {
     title: string;
     poster: string;
     rating: number;
+    genres: string[];
     //possibly add functions that the movie card uses
 }
 
@@ -14,6 +15,7 @@ const Movie: React.FC<movieProps> = ({
     title,
     poster,
     rating,
+    genres,
 }) => {
     //Where the html comes into play
     return (
