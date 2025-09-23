@@ -7,6 +7,9 @@ interface movieProps {
     poster: string;
     rating: number;
     genres: string[];
+    currentlyRunning: boolean;
+    comingSoon: boolean;
+    //currentlyRunning and comingSoon tell which section of the home screen the movie card will be
     //possibly add functions that the movie card uses
 }
 
@@ -16,6 +19,8 @@ const Movie: React.FC<movieProps> = ({
     poster,
     rating,
     genres,
+    currentlyRunning,
+    comingSoon
 }) => {
     //Where the html comes into play
     return (
