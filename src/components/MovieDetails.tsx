@@ -6,6 +6,9 @@ interface movieDetailsProps {
     title: string;
     poster: string;
     rating: number;
+    details: string;
+    trailer: string;
+    genres: string[];
     //possibly add functions that the movieDetails card uses
 }
 
@@ -14,6 +17,9 @@ const MovieDetails: React.FC<movieDetailsProps> = ({
     title,
     poster,
     rating,
+    details,
+    trailer,
+    genres
 }) => {
     //Where the html comes into play
     return (
@@ -24,3 +30,5 @@ const MovieDetails: React.FC<movieDetailsProps> = ({
         </div>
     )
 }
+
+export default MovieDetails;

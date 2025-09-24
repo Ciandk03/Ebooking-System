@@ -29,3 +29,5 @@ const Movie: React.FC<movieProps> = ({
         </div>
     )
 }
+
+export default Movie;

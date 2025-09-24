@@ -1,8 +1,19 @@
 import Image from "next/image";
+import Movie from "@/components/Movie";
+import Showtimes from "@/components/Showtimes";
+import MovieDetails from "@/components/MovieDetails";
 
 export default function Home() {
+  //write an async function to retrieve an array of movie data from the database
   return (
+    //All of what's in return is the contents of the home screen
+    //Use the map function to pull each Movie from the beforementioned array
+    //and make Movie cards out of them that are displayed on the screen
+    //add a search bar and a genre bar, which will modify the retrieval function 
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
+      <p>GRANT: I ADDED A SAMPLE MOVIE ELEMENT JUST TO TEST IT. FEEL FREE TO ERASE THE WHOLE PAGE</p>
+      <Movie id={5} title="Sample" poster="image" rating={2} genres={["sci-fi","sample"]}
+      currentlyRunning={false} comingSoon={true}></Movie>
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
         <Image
           className="dark:invert"

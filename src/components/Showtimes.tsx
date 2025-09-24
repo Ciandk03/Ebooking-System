@@ -8,7 +8,7 @@ interface showtimesProps {
     //possibly add functions that the showtimes card uses
 }
 
-const MovieDetails: React.FC<showtimesProps> = ({
+const Showtimes: React.FC<showtimesProps> = ({
     id,
     title,
     times
@@ -23,3 +23,5 @@ const MovieDetails: React.FC<showtimesProps> = ({
         </div>
     )
 }
+
+export default Showtimes;
