@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 export default function BookingPage() {
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     movieTitle: '',
     showtime: '',
@@ -11,6 +13,20 @@ export default function BookingPage() {
     email: '',
     phone: ''
   });
+
+  // Pre-fill form with URL parameters
+  useEffect(() => {
+    const movieId = searchParams.get('movieId');
+    const title = searchParams.get('title');
+    const showtime = searchParams.get('showtime');
+
+    if (title) {
+      setFormData(prev => ({ ...prev, movieTitle: title }));
+    }
+    if (showtime) {
+      setFormData(prev => ({ ...prev, showtime: showtime }));
+    }
+  }, [searchParams]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
