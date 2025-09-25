@@ -135,7 +135,8 @@ export default function HomePage() {
       try {
         const r = await fetch("/api/movies", { cache: "no-store" });
         if (!r.ok) throw new Error("API error");
-        setMovies(await r.json());
+        const response = await r.json();
+        setMovies(response.data || []); // Extract the data array from the API response
       } catch (e: any) {
         setError(e?.message || "Failed");
         setMovies([]); // if DB down, show empty state
