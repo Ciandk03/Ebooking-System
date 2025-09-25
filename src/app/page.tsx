@@ -1,114 +1,206 @@
-import Image from "next/image";
-import Movie from "@/components/Movie";
-import Showtimes from "@/components/Showtimes";
-import MovieDetails from "@/components/MovieDetails";
+"use client";
+import React, { useEffect, useMemo, useState } from "react";
+import type { Movie } from "@/types/database";
+import MovieCard from "@/components/Movie";
+import FilmReelBackground from "@/components/FilmReelBackground";
 
-export default function Home() {
-  //write an async function to retrieve an array of movie data from the database
+const UGA = {
+  black: "#000000",
+  nearBlack: "#0b0b0b",
+  dark: "#151515",
+  gray: "#d1d5db",
+  white: "#ffffff",
+  red: "#ba0c2f", 
+  redDark: "#8a0a23",
+  border: "#2a2a2a",
+};
+
+const styles: Record<string, React.CSSProperties> = {
+  page: {
+    borderTop: `4px solid ${UGA.red}`,
+    padding: 24,
+    maxWidth: 1200,
+    margin: "0 auto",
+    fontFamily:
+      "Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+    background: UGA.black,
+    minHeight: "100vh",
+    color: UGA.white,
+    overflow: "hidden",
+    position: "relative",
+  },
+  header: {
+    
+    display: "flex",
+    gap: 12,
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  title: { fontSize: 28, fontWeight: 900, letterSpacing: -0.25 },
+  searchRow: {
+    display: "grid",
+    gridTemplateColumns: "1fr 220px 120px",
+    gap: 10,
+    width: "100%",
+    maxWidth: 700,
+  },
+  input: {
+    padding: "10px 12px",
+    borderRadius: 12,
+    border: `1px solid ${UGA.border}`,
+    background: UGA.dark,
+    color: UGA.white,
+    boxShadow: `0 0 0 1px transparent`,
+  },
+  select: {
+    padding: "10px 12px",
+    borderRadius: 12,
+    border: `1px solid ${UGA.border}`,
+    background: UGA.dark,
+    color: UGA.white,
+  },
+  ghostBtn: {
+    padding: "10px 12px",
+    borderRadius: 12,
+    border: `1px solid ${UGA.red}`,
+    background: UGA.black,
+    color: UGA.white,
+    cursor: "pointer",
+    fontWeight: 700,
+  },
+  tabs: { display: "flex", gap: 10, marginTop: 16, marginBottom: 8 },
+  tab: (active: boolean): React.CSSProperties => ({
+    padding: "8px 16px",
+    borderRadius: 999,
+    border: `1px solid ${active ? UGA.red : UGA.border}`,
+    background: active ? UGA.red : UGA.nearBlack,
+    color: UGA.white,
+    cursor: "pointer",
+    fontWeight: 800,
+    letterSpacing: 0.2,
+  }),
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+    gap: 18,
+    marginTop: 16,
+  },
+  empty: { padding: 32, textAlign: "center", color: UGA.gray },
+  modalBg: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0,0,0,0.6)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 50,
+  },
+  modal: {
+    width: "min(960px,92vw)",
+    aspectRatio: "16/9",
+    background: UGA.black,
+    borderRadius: 12,
+    overflow: "hidden",
+    border: `1px solid ${UGA.red}`,
+  },
+};
+
+
+function deriveStatus(m: Movie) {
+  if (m.currentlyRunning) return m.currentlyRunning ? "RUNNING" : "COMING_SOON";
+  if (!m.releaseDate) return "RUNNING";
+  return new Date(m.releaseDate) > new Date() ? "COMING_SOON" : "RUNNING";
+}
+
+function ytId(url?: string) {
+  if (!url) return;
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtube.com")) return u.searchParams.get("v") || undefined;
+    if (u.hostname.includes("youtu.be")) return u.pathname.slice(1) || undefined;
+  } catch {}
+}
+
+export default function HomePage() {
+  const [movies, setMovies] = useState<Movie[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [genre, setGenre] = useState("ALL");
+  const [tab, setTab] = useState<"RUNNING" | "COMING_SOON">("RUNNING");
+  const [trailer, setTrailer] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetch("/api/movies", { cache: "no-store" });
+        if (!r.ok) throw new Error("API error");
+        setMovies(await r.json());
+      } catch (e: any) {
+        setError(e?.message || "Failed");
+        setMovies([]); // if DB down, show empty state
+      }
+    })();
+  }, []);
+
+  const allGenres = useMemo(() => {
+    const s = new Set<string>();
+    movies?.forEach((m) => m.genres?.forEach((g) => s.add(g)));
+    return ["ALL", ...Array.from(s).sort()];
+  }, [movies]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return (movies || [])
+      .filter((m) => deriveStatus(m) === tab)
+      .filter((m) => (q ? m.title.toLowerCase().includes(q) : true))
+      .filter((m) => (genre === "ALL" ? true : m.genres?.includes(genre)));
+  }, [movies, query, genre, tab]);
+
+  const runningCount = (movies || []).filter((m) => deriveStatus(m) === "RUNNING").length;
+  const comingCount = (movies || []).filter((m) => deriveStatus(m) === "COMING_SOON").length;
+
   return (
-    //All of what's in return is the contents of the home screen
-    //Use the map function to pull each Movie from the beforementioned array
-    //and make Movie cards out of them that are displayed on the screen
-    //add a search bar and a genre bar, which will modify the retrieval function 
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <p>GRANT: I ADDED A SAMPLE MOVIE ELEMENT JUST TO TEST IT. FEEL FREE TO ERASE THE WHOLE PAGE</p>
-      <Movie id={5} title="Sample" poster="image" rating={2} genres={["sci-fi","sample"]}
-      currentlyRunning={false} comingSoon={true}></Movie>
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <main style={styles.page}>
+      <div style={{ position: "relative", zIndex: 1 }}><div style={styles.header}>
+        <h1 style={styles.title}>Cinema E-Booking System</h1>
+        <div style={styles.searchRow}>
+          <input style={styles.input} placeholder="Search by title…" value={query} onChange={(e) => setQuery(e.target.value)} />
+          <select style={styles.select} value={genre} onChange={(e) => setGenre(e.target.value)}>
+            {allGenres.map((g) => <option key={g} value={g}>{g}</option>)}
+          </select>
+          <button style={styles.ghostBtn} onClick={() => { setQuery(""); setGenre("ALL"); }}>Reset</button></div>
+      
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </div>
+
+      <div style={styles.tabs}>
+        <button style={styles.tab(tab === "RUNNING")} onClick={() => setTab("RUNNING")}>Currently Running ({runningCount})</button>
+        <button style={styles.tab(tab === "COMING_SOON")} onClick={() => setTab("COMING_SOON")}>Coming Soon ({comingCount})</button>
+      </div>
+
+      {!movies ? <div style={styles.empty}>Loading…</div> : null}
+      {movies && filtered.length === 0 ? <div style={styles.empty}>No movies found.</div> : null}
+
+      {movies && filtered.length > 0 &&
+        <div style={styles.grid}>
+          {filtered.map((m) => (
+            <MovieCard key={m.id} m={m} onWatchTrailer={(url) => setTrailer(url)} />
+          ))}
+        </div>
+      }
+
+      {trailer && (
+        <div style={styles.modalBg} onClick={() => setTrailer(null)}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            {ytId(trailer)
+              ? <iframe title="Trailer" width="100%" height="100%" src={`https://www.youtube.com/embed/${ytId(trailer)}?autoplay=1`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+              : <video src={trailer} controls style={{ width: "100%", height: "100%" }} />}
+          </div>
+        </div>
+      )}
+
+      {error && <p style={{ marginTop: 12, color: "#9ca3af", fontSize: 12 }}>Note: {error}</p>}
+    </main>
   );
 }
