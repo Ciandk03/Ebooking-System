@@ -108,9 +108,13 @@ const styles: Record<string, React.CSSProperties> = {
 
 
 function deriveStatus(m: Movie) {
-  if (m.currentlyRunning) return m.currentlyRunning ? "RUNNING" : "COMING_SOON";
-  if (!m.releaseDate) return "RUNNING";
-  return new Date(m.releaseDate) > new Date() ? "COMING_SOON" : "RUNNING";
+  if (m.currentlyRunning) {
+    return "RUNNING";
+  } else {
+    return "COMING_SOON";
+  }
+  //if (!m.releaseDate) return "RUNNING";
+  //return new Date(m.releaseDate) > new Date() ? "COMING_SOON" : "RUNNING";
 }
 
 function ytId(url?: string) {
