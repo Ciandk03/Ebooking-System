@@ -108,9 +108,13 @@ const styles: Record<string, React.CSSProperties> = {
 
 
 function deriveStatus(m: Movie) {
-  if (m.currentlyRunning) return m.currentlyRunning ? "RUNNING" : "COMING_SOON";
-  if (!m.releaseDate) return "RUNNING";
-  return new Date(m.releaseDate) > new Date() ? "COMING_SOON" : "RUNNING";
+  if (m.currentlyRunning) {
+    return "RUNNING";
+  } else {
+    return "COMING_SOON";
+  }
+  //if (!m.releaseDate) return "RUNNING";
+  //return new Date(m.releaseDate) > new Date() ? "COMING_SOON" : "RUNNING";
 }
 
 function ytId(url?: string) {
@@ -135,7 +139,8 @@ export default function HomePage() {
       try {
         const r = await fetch("/api/movies", { cache: "no-store" });
         if (!r.ok) throw new Error("API error");
-        setMovies(await r.json());
+        const response = await r.json();
+        setMovies(response.data || []); // Extract the data array from the API response
       } catch (e: any) {
         setError(e?.message || "Failed");
         setMovies([]); // if DB down, show empty state

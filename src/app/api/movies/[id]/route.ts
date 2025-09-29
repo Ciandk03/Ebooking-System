@@ -4,9 +4,9 @@ import { movieService } from '../../../../services/database';
 // GET /api/movies/[id] - Get movie by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await params;
   console.log(`API: GET /api/movies/${id} - Fetching movie by ID`);
   
   try {
@@ -44,9 +44,9 @@ export async function GET(
 // PUT /api/movies/[id] - Update movie
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await params;
   console.log(`API: PUT /api/movies/${id} - Updating movie`);
   
   try {
@@ -76,9 +76,9 @@ export async function PUT(
 // DELETE /api/movies/[id] - Delete movie
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await params;
   console.log(`API: DELETE /api/movies/${id} - Deleting movie`);
   
   try {
