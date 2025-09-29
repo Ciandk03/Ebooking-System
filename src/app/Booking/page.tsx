@@ -60,7 +60,7 @@ export default function BookingPage() {
                 name="movieTitle"
                 value={formData.movieTitle}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter movie title"
                 required
               />
@@ -75,7 +75,7 @@ export default function BookingPage() {
                 name="showtime"
                 value={formData.showtime}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               >
                 <option value="">Select showtime</option>
@@ -84,6 +84,9 @@ export default function BookingPage() {
                 <option value="4:00 PM">4:00 PM</option>
                 <option value="7:00 PM">7:00 PM</option>
                 <option value="10:00 PM">10:00 PM</option>
+                <option value="2:00 PM">2:00 PM</option>
+                <option value="5:00 PM">5:00 PM</option>
+                <option value="8:00 PM">8:00 PM</option>
               </select>
             </div>
 
@@ -97,7 +100,7 @@ export default function BookingPage() {
                 name="seats"
                 value={formData.seats}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter number of seats"
                 min="1"
                 max="10"
@@ -115,7 +118,7 @@ export default function BookingPage() {
                 name="customerName"
                 value={formData.customerName}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter your full name"
                 required
               />
@@ -131,7 +134,7 @@ export default function BookingPage() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter your email"
                 required
               />
@@ -147,7 +150,7 @@ export default function BookingPage() {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter your phone number"
                 required
               />

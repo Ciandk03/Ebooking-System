@@ -116,7 +116,7 @@ export default function MovieCard({ m, onWatchTrailer }: { m: Movie; onWatchTrai
         <div style={styles.row}>
           {SHOWTIMES.map((t) => (
             <button key={t} style={styles.btnGhost}
-              onClick={() => router.push(`/booking?movieId=${encodeURIComponent(m.id)}&title=${encodeURIComponent(m.title)}&showtime=${encodeURIComponent(t)}`)}>
+              onClick={() => router.push(`/Booking?movieId=${encodeURIComponent(m.id)}&title=${encodeURIComponent(m.title)}&showtime=${encodeURIComponent(t)}`)}>
               {t}
             </button>
           ))}
