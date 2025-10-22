@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import type { Movie } from "@/types/database";
 import MovieCard from "@/components/Movie";
 import FilmReelBackground from "@/components/FilmReelBackground";
+import { useRouter } from "next/navigation";
 
 const UGA = {
   black: "#000000",
@@ -30,20 +31,22 @@ const styles: Record<string, React.CSSProperties> = {
     position: "relative",
   },
   header: {
-    
     display: "flex",
-    gap: 12,
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 16,
   },
   title: { fontSize: 28, fontWeight: 900, letterSpacing: -0.25 },
-  searchRow: {
-    display: "grid",
-    gridTemplateColumns: "1fr 220px 120px",
-    gap: 10,
-    width: "100%",
-    maxWidth: 700,
+  registerBtn: {
+    padding: "10px 18px",
+    borderRadius: 12,
+    border: "none",
+    background: UGA.red,
+    color: UGA.white,
+    cursor: "pointer",
+    fontWeight: 700,
+    fontSize: 16,
+    margin: "0 0 0 8px",
   },
   input: {
     padding: "10px 12px",
@@ -68,6 +71,8 @@ const styles: Record<string, React.CSSProperties> = {
     color: UGA.white,
     cursor: "pointer",
     fontWeight: 700,
+    margin: "0 0 0 8px",
+
   },
   tabs: { display: "flex", gap: 10, marginTop: 16, marginBottom: 8 },
   tab: (active: boolean): React.CSSProperties => ({
@@ -127,6 +132,7 @@ function ytId(url?: string) {
 }
 
 export default function HomePage() {
+  const router = useRouter();
   const [movies, setMovies] = useState<Movie[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -140,10 +146,10 @@ export default function HomePage() {
         const r = await fetch("/api/movies", { cache: "no-store" });
         if (!r.ok) throw new Error("API error");
         const response = await r.json();
-        setMovies(response.data || []); // Extract the data array from the API response
+        setMovies(response.data || []);
       } catch (e: any) {
         setError(e?.message || "Failed");
-        setMovies([]); // if DB down, show empty state
+        setMovies([]);
       }
     })();
   }, []);
@@ -174,8 +180,9 @@ export default function HomePage() {
           <select style={styles.select} value={genre} onChange={(e) => setGenre(e.target.value)}>
             {allGenres.map((g) => <option key={g} value={g}>{g}</option>)}
           </select>
-          <button style={styles.ghostBtn} onClick={() => { setQuery(""); setGenre("ALL"); }}>Reset</button></div>
-      
+          <button style={styles.ghostBtn} onClick={() => { setQuery(""); setGenre("ALL"); }}>Reset</button>
+          <button style={styles.registerBtn} onClick={() => router.push("/Registration")}>Register</button>
+          </div>
         </div>
       </div>
 
