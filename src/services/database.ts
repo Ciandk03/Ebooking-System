@@ -227,3 +227,80 @@ export const bookingService = {
     }
   },
 };
+
+// Users
+export const usersCollection = firestore.collection(db, 'users');
+
+export const userService = {
+  async getAllUsers(): Promise<User[]> {
+    console.log('Fetching all users...');
+    try {
+      const snapshot = await firestore.getDocs(usersCollection);
+      return snapshot.docs.map(mapDoc<User>);
+    } catch (error) {
+      throw new Error(`getAllUsers failed: ${error}`);
+    }
+  },
+
+  async getUserById(id: string): Promise<User | null> {
+    console.log(`Fetching user ID: ${id}`);
+    try {
+      const docRef = firestore.doc(usersCollection, id);
+      const docSnap = await firestore.getDoc(docRef);
+      return docSnap.exists() ? mapDoc<User>(docSnap) : null;
+    } catch (error) {
+      throw new Error(`getUserById failed: ${error}`);
+    }
+  },
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    console.log(`Fetching user by email: ${email}`);
+    try {
+      const q = firestore.query(usersCollection, firestore.where('email', '==', email));
+      const snapshot = await firestore.getDocs(q);
+      if (snapshot.empty) return null;
+      return mapDoc<User>(snapshot.docs[0]);
+    } catch (error) {
+      throw new Error(`getUserByEmail failed: ${error}`);
+    }
+  },
+
+  async createUser(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    console.log(`Creating user: ${userData.email}`);
+    try {
+      const now = firestore.Timestamp.fromDate(new Date());
+      const docRef = await firestore.addDoc(usersCollection, {
+        ...userData,
+        createdAt: now,
+        updatedAt: now,
+      });
+      return docRef.id;
+    } catch (error) {
+      throw new Error(`createUser failed: ${error}`);
+    }
+  },
+
+  async updateUser(id: string, userData: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>): Promise<void> {
+    console.log(`Updating user ID: ${id}`);
+    try {
+      const docRef = firestore.doc(usersCollection, id);
+      await firestore.updateDoc(docRef, {
+        ...userData,
+        updatedAt: firestore.Timestamp.fromDate(new Date()),
+      });
+    } catch (error) {
+      throw new Error(`updateUser failed: ${error}`);
+    }
+  },
+
+  async deleteUser(id: string): Promise<void> {
+    console.log(`Deleting user ID: ${id}`);
+    try {
+      const docRef = firestore.doc(usersCollection, id);
+      await firestore.deleteDoc(docRef);
+    } catch (error) {
+      throw new Error(`deleteUser failed: ${error}`);
+    }
+  },
+};
+
