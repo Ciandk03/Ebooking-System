@@ -1,4 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is an E-Booking System built with [Next.js](https://nextjs.org) for movie ticket booking.
+
+## Features
+
+- **User Registration**: Complete user registration with optional address and payment method fields
+- **Password Security**: Passwords are hashed using SHA-256 for secure storage
+- **Payment Security**: Payment information is encrypted using AES encryption
+- **Address Handling**: Addresses are stored as strings and can be parsed by the application
+- **API Routes**: Complete CRUD operations for users, movies, showtimes, and bookings
+- **Firebase Integration**: Uses Firebase Firestore for data storage
+
+## Security Features
+
+- **Password Security**: Passwords are hashed using SHA-256 before storage
+- **Payment Card Encryption**: All payment card information is encrypted using AES encryption
+- **Card Data Protection**: Complete card details (number, holder name, expiry, CVV, billing address) are encrypted
+- **Data Masking**: Sensitive data is properly masked in API responses (card numbers show only last 4 digits)
+- **Card Validation**: Built-in Luhn algorithm validation for card numbers
+- **Debug Logging**: Comprehensive logging for password and payment processing verification
+
+## Payment Card Features
+
+- **Complete Card Information**: Collects all necessary card details
+- **Real-time Validation**: Card number validation with visual feedback
+- **Secure Storage**: All card data encrypted before database storage
+- **Masked Display**: Card numbers are masked for security (shows only last 4 digits)
+- **Optional Fields**: Payment information is completely optional during registration
 
 ## Getting Started
 

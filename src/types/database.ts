@@ -42,11 +42,23 @@ export interface Booking {
   updatedAt: Date;
 }
 
+export interface PaymentCard {
+  cardNumber: string;
+  cardHolderName: string;
+  expiryMonth: string;
+  expiryYear: string;
+  cvv: string;
+  billingAddress?: string;
+}
+
 export interface User {
   id: string;
   email: string;
   name: string;
   phone?: string;
+  password?: string; // Encrypted password
+  address?: string; // Optional address as string
+  payment?: string; // Optional encrypted payment card info (JSON string)
   createdAt: Date;
   updatedAt: Date;
 }
