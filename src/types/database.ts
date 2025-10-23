@@ -59,6 +59,7 @@ export interface User {
   password?: string; // Encrypted password
   address?: string; // Optional address as string
   payment?: string; // Optional encrypted payment card info (JSON string)
+  role?: 'user' | 'admin'; // User role
   createdAt: Date;
   updatedAt: Date;
 }

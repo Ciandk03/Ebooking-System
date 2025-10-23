@@ -4,6 +4,7 @@ import type { Movie } from "@/types/database";
 import MovieCard from "@/components/Movie";
 import FilmReelBackground from "@/components/FilmReelBackground";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const UGA = {
   black: "#000000",
@@ -75,16 +76,22 @@ const styles: Record<string, React.CSSProperties> = {
 
   },
   tabs: { display: "flex", gap: 10, marginTop: 16, marginBottom: 8 },
-  tab: (active: boolean): React.CSSProperties => ({
+  tab: {
     padding: "8px 16px",
     borderRadius: 999,
-    border: `1px solid ${active ? UGA.red : UGA.border}`,
-    background: active ? UGA.red : UGA.nearBlack,
     color: UGA.white,
     cursor: "pointer",
     fontWeight: 800,
     letterSpacing: 0.2,
-  }),
+  },
+  tabActive: {
+    border: `1px solid ${UGA.red}`,
+    background: UGA.red,
+  },
+  tabInactive: {
+    border: `1px solid ${UGA.border}`,
+    background: UGA.nearBlack,
+  },
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
@@ -139,8 +146,19 @@ export default function HomePage() {
   const [genre, setGenre] = useState("ALL");
   const [tab, setTab] = useState<"RUNNING" | "COMING_SOON">("RUNNING");
   const [trailer, setTrailer] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
+    // Check if user is logged in
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData));
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
+
     (async () => {
       try {
         const r = await fetch("/api/movies", { cache: "no-store" });
@@ -171,6 +189,23 @@ export default function HomePage() {
   const runningCount = (movies || []).filter((m) => deriveStatus(m) === "RUNNING").length;
   const comingCount = (movies || []).filter((m) => deriveStatus(m) === "COMING_SOON").length;
 
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+      setUser(null);
+    }
+  };
+
   return (
     <main style={styles.page}>
       <div style={{ position: "relative", zIndex: 1 }}><div style={styles.header}>
@@ -181,14 +216,27 @@ export default function HomePage() {
             {allGenres.map((g) => <option key={g} value={g}>{g}</option>)}
           </select>
           <button style={styles.ghostBtn} onClick={() => { setQuery(""); setGenre("ALL"); }}>Reset</button>
-          <button style={styles.registerBtn} onClick={() => router.push("/Registration")}>Register</button>
+          {user ? (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span style={{ fontSize: 14, color: UGA.gray }}>Welcome, {user.name}</span>
+              <button style={styles.ghostBtn} onClick={() => router.push(user.role === 'admin' ? '/admin' : '/dashboard')}>
+                {user.role === 'admin' ? 'Admin Panel' : 'Account'}
+              </button>
+              <button style={styles.registerBtn} onClick={handleLogout}>Logout</button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Link href="/Login" style={{ ...styles.ghostBtn, textDecoration: 'none', display: 'inline-block' }}>Login</Link>
+              <button style={styles.registerBtn} onClick={() => router.push("/Registration")}>Register</button>
+            </div>
+          )}
           </div>
         </div>
       </div>
 
       <div style={styles.tabs}>
-        <button style={styles.tab(tab === "RUNNING")} onClick={() => setTab("RUNNING")}>Currently Running ({runningCount})</button>
-        <button style={styles.tab(tab === "COMING_SOON")} onClick={() => setTab("COMING_SOON")}>Coming Soon ({comingCount})</button>
+        <button style={{...styles.tab, ...(tab === "RUNNING" ? styles.tabActive : styles.tabInactive)}} onClick={() => setTab("RUNNING")}>Currently Running ({runningCount})</button>
+        <button style={{...styles.tab, ...(tab === "COMING_SOON" ? styles.tabActive : styles.tabInactive)}} onClick={() => setTab("COMING_SOON")}>Coming Soon ({comingCount})</button>
       </div>
 
       {!movies ? <div style={styles.empty}>Loading…</div> : null}
