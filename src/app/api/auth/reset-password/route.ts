@@ -3,7 +3,6 @@ import { userService } from '../../../../services/database';
 import { hashPassword } from '../../../../utils/encryption';
 import crypto from 'crypto';
 
-// In production, you would store reset tokens in database
 const RESET_TOKENS = new Map<string, { token: string; expires: number; userId: string }>();
 
 export async function POST(request: NextRequest) {

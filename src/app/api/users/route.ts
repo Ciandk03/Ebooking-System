@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
     try {
         const users = await userService.getAllUsers();
         
-        // Decrypt sensitive data for display (in production, you'd want proper access control)
+        // Decrypt sensitive data for display
         const decryptedUsers = users.map(user => ({
             ...user,
             password: user.password ? '[ENCRYPTED]' : undefined,

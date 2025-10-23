@@ -3,7 +3,7 @@ import { userService } from '../../../../services/database';
 import { decrypt, decryptPaymentCard, maskCardNumber } from '../../../../utils/encryption';
 import { PaymentCard } from '../../../../types/database';
 
-// Get user by ID
+
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
     console.log(`API: GET /api/users/${params.id} - Fetching user`);
     
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
             }, { status: 404 });
         }
         
-        // Decrypt sensitive data if needed (in production, you'd want proper access control)
+        // Decrypt sensitive data if needed
         let maskedPayment = undefined;
         if (user.payment) {
             try {
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 }
 
-// Update user by ID
+
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
     console.log(`API: PUT /api/users/${params.id} - Updating user`);
     
@@ -67,14 +67,14 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         const body = await request.json();
         console.log('API: User update data received:', JSON.stringify(body, null, 2));
         
-        // If password is being updated, hash it
+        
         if (body.password) {
             const { hashPassword } = await import('../../../../utils/encryption');
             body.password = hashPassword(body.password);
             console.log('API: Password updated and hashed');
         }
         
-        // If payment info is being updated, encrypt it
+        
         if (body.payment && typeof body.payment === 'object') {
             const { encryptPaymentCard } = await import('../../../../utils/encryption');
             body.payment = encryptPaymentCard(body.payment as PaymentCard);
@@ -99,7 +99,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 }
 
-// Delete user by ID
+
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
     console.log(`API: DELETE /api/users/${params.id} - Deleting user`);
     

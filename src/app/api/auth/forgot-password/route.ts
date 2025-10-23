@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { userService } from '../../../../services/database';
 import crypto from 'crypto';
 
-// In production, you would use a proper email service like SendGrid, AWS SES, etc.
+
 const RESET_TOKENS = new Map<string, { token: string; expires: number; userId: string }>();
 
 export async function POST(request: NextRequest) {
@@ -37,20 +37,18 @@ export async function POST(request: NextRequest) {
         const resetToken = crypto.randomBytes(32).toString('hex');
         const expires = Date.now() + 3600000; // 1 hour from now
         
-        // Store reset token (in production, store in database)
+        // Store reset token
         RESET_TOKENS.set(email, {
             token: resetToken,
             expires: expires,
             userId: user.id
         });
 
-        // In production, send actual email here
         console.log('API: Password reset token generated for user:', email);
         console.log('API: Reset token:', resetToken);
         console.log('API: Reset link: http://localhost:3001/reset-password?token=' + resetToken);
         
         // For development, we'll just log the reset link
-        // In production, you would send an email with this link
         
         return NextResponse.json({
             success: true,
