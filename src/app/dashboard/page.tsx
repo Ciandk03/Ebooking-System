@@ -224,18 +224,29 @@ export default function DashboardPage() {
           <div style={styles.card}>
             <h2 style={styles.cardTitle}>Quick Actions</h2>
             <div style={styles.cardContent}>
-              <p>Browse movies and book your tickets.</p>
-              <button
-                style={{
-                  ...styles.logoutButton,
-                  marginTop: 16,
-                  background: UGA.dark,
-                  border: `1px solid ${UGA.border}`,
-                }}
-                onClick={() => router.push('/')}
-              >
-                Browse Movies
-              </button>
+              <p>Manage your account and browse movies.</p>
+              <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
+                <button
+                  style={{
+                    ...styles.logoutButton,
+                    background: UGA.red,
+                    border: 'none',
+                  }}
+                  onClick={() => router.push('/edit-profile')}
+                >
+                  Edit Profile
+                </button>
+                <button
+                  style={{
+                    ...styles.logoutButton,
+                    background: UGA.dark,
+                    border: `1px solid ${UGA.border}`,
+                  }}
+                  onClick={() => router.push('/')}
+                >
+                  Browse Movies
+                </button>
+              </div>
             </div>
           </div>
         </div>
