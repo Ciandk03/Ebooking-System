@@ -12,7 +12,7 @@ const UGA = {
   dark: "#151515",
   gray: "#d1d5db",
   white: "#ffffff",
-  red: "#ba0c2f", 
+  red: "#ba0c2f",
   redDark: "#8a0a23",
   border: "#2a2a2a",
 };
@@ -46,8 +46,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: UGA.white,
     cursor: "pointer",
     fontWeight: 700,
-    fontSize: 16,
-    margin: "0 0 0 8px",
+    fontSize: 16
   },
   input: {
     padding: "10px 12px",
@@ -72,8 +71,6 @@ const styles: Record<string, React.CSSProperties> = {
     color: UGA.white,
     cursor: "pointer",
     fontWeight: 700,
-    margin: "0 0 0 8px",
-
   },
   tabs: { display: "flex", gap: 10, marginTop: 16, marginBottom: 8 },
   tab: {
@@ -118,7 +115,6 @@ const styles: Record<string, React.CSSProperties> = {
   },
 };
 
-
 function deriveStatus(m: Movie) {
   if (m.currentlyRunning) {
     return "RUNNING";
@@ -133,8 +129,10 @@ function ytId(url?: string) {
   if (!url) return;
   try {
     const u = new URL(url);
-    if (u.hostname.includes("youtube.com")) return u.searchParams.get("v") || undefined;
-    if (u.hostname.includes("youtu.be")) return u.pathname.slice(1) || undefined;
+    if (u.hostname.includes("youtube.com"))
+      return u.searchParams.get("v") || undefined;
+    if (u.hostname.includes("youtu.be"))
+      return u.pathname.slice(1) || undefined;
   } catch {}
 }
 
@@ -150,12 +148,12 @@ export default function HomePage() {
 
   useEffect(() => {
     // Check if user is logged in
-    const userData = localStorage.getItem('user');
+    const userData = localStorage.getItem("user");
     if (userData) {
       try {
         setUser(JSON.parse(userData));
       } catch (error) {
-        console.error('Error parsing user data:', error);
+        console.error("Error parsing user data:", error);
       }
     }
 
@@ -186,81 +184,181 @@ export default function HomePage() {
       .filter((m) => (genre === "ALL" ? true : m.genres?.includes(genre)));
   }, [movies, query, genre, tab]);
 
-  const runningCount = (movies || []).filter((m) => deriveStatus(m) === "RUNNING").length;
-  const comingCount = (movies || []).filter((m) => deriveStatus(m) === "COMING_SOON").length;
+  const runningCount = (movies || []).filter(
+    (m) => deriveStatus(m) === "RUNNING"
+  ).length;
+  const comingCount = (movies || []).filter(
+    (m) => deriveStatus(m) === "COMING_SOON"
+  ).length;
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
+      await fetch("/api/auth/logout", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
       setUser(null);
     }
   };
 
   return (
     <main style={styles.page}>
-      <div style={{ position: "relative", zIndex: 1 }}><div style={styles.header}>
-        <h1 style={styles.title}>Cinema E-Booking System</h1>
-        <div style={styles.searchRow}>
-          <input style={styles.input} placeholder="Search by title…" value={query} onChange={(e) => setQuery(e.target.value)} />
-          <select style={styles.select} value={genre} onChange={(e) => setGenre(e.target.value)}>
-            {allGenres.map((g) => <option key={g} value={g}>{g}</option>)}
-          </select>
-          <button style={styles.ghostBtn} onClick={() => { setQuery(""); setGenre("ALL"); }}>Reset</button>
-          {user ? (
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <span style={{ fontSize: 14, color: UGA.gray }}>Welcome, {user.name}</span>
-              <button style={styles.ghostBtn} onClick={() => router.push(user.role === 'admin' ? '/admin' : '/dashboard')}>
-                {user.role === 'admin' ? 'Admin Panel' : 'Account'}
-              </button>
-              <button style={styles.registerBtn} onClick={handleLogout}>Logout</button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', gap: 8 }}>
-              <Link href="/Login" style={{ ...styles.ghostBtn, textDecoration: 'none', display: 'inline-block' }}>Login</Link>
-              <button style={styles.registerBtn} onClick={() => router.push("/Registration")}>Register</button>
-            </div>
-          )}
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <div style={styles.header}>
+          <h1 style={styles.title}>Cinema E-Booking System</h1>
+
+          <div
+            style={{
+              ...styles.searchRow,
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
+            <input
+              style={styles.input}
+              placeholder="Search by title…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <select
+              style={styles.select}
+              value={genre}
+              onChange={(e) => setGenre(e.target.value)}
+            >
+              {allGenres.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
+
+            <button
+              style={{ ...styles.ghostBtn, marginLeft: 4 }}
+              onClick={() => {
+                setQuery("");
+                setGenre("ALL");
+              }}
+            >
+              Reset
+            </button>
+
+            {user ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: 14, color: UGA.gray }}>
+                  Welcome, {user.name}
+                </span>
+                <button
+                  style={styles.ghostBtn}
+                  onClick={() =>
+                    router.push(user.role === "admin" ? "/admin" : "/dashboard")
+                  }
+                >
+                  {user.role === "admin" ? "Admin Panel" : "Account"}
+                </button>
+                <button style={styles.registerBtn} onClick={handleLogout}>
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <Link
+                  href="/Login"
+                  style={{
+                    ...styles.ghostBtn,
+                    textDecoration: "none",
+                    display: "inline-block",
+                  }}
+                >
+                  Login
+                </Link>
+                <button
+                  style={styles.registerBtn}
+                  onClick={() => router.push("/Registration")}
+                >
+                  Register
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       <div style={styles.tabs}>
-        <button style={{...styles.tab, ...(tab === "RUNNING" ? styles.tabActive : styles.tabInactive)}} onClick={() => setTab("RUNNING")}>Currently Running ({runningCount})</button>
-        <button style={{...styles.tab, ...(tab === "COMING_SOON" ? styles.tabActive : styles.tabInactive)}} onClick={() => setTab("COMING_SOON")}>Coming Soon ({comingCount})</button>
+        <button
+          style={{
+            ...styles.tab,
+            ...(tab === "RUNNING" ? styles.tabActive : styles.tabInactive),
+          }}
+          onClick={() => setTab("RUNNING")}
+        >
+          Currently Running ({runningCount})
+        </button>
+        <button
+          style={{
+            ...styles.tab,
+            ...(tab === "COMING_SOON" ? styles.tabActive : styles.tabInactive),
+          }}
+          onClick={() => setTab("COMING_SOON")}
+        >
+          Coming Soon ({comingCount})
+        </button>
       </div>
 
       {!movies ? <div style={styles.empty}>Loading…</div> : null}
-      {movies && filtered.length === 0 ? <div style={styles.empty}>No movies found.</div> : null}
+      {movies && filtered.length === 0 ? (
+        <div style={styles.empty}>No movies found.</div>
+      ) : null}
 
-      {movies && filtered.length > 0 &&
+      {movies && filtered.length > 0 && (
         <div style={styles.grid}>
           {filtered.map((m) => (
-            <MovieCard key={m.id} m={m} onWatchTrailer={(url) => setTrailer(url)} />
+            <MovieCard
+              key={m.id}
+              m={m}
+              onWatchTrailer={(url) => setTrailer(url)}
+            />
           ))}
         </div>
-      }
+      )}
 
       {trailer && (
         <div style={styles.modalBg} onClick={() => setTrailer(null)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            {ytId(trailer)
-              ? <iframe title="Trailer" width="100%" height="100%" src={`https://www.youtube.com/embed/${ytId(trailer)}?autoplay=1`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-              : <video src={trailer} controls style={{ width: "100%", height: "100%" }} />}
+            {ytId(trailer) ? (
+              <iframe
+                title="Trailer"
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${ytId(
+                  trailer
+                )}?autoplay=1`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <video
+                src={trailer}
+                controls
+                style={{ width: "100%", height: "100%" }}
+              />
+            )}
           </div>
         </div>
       )}
 
-      {error && <p style={{ marginTop: 12, color: "#9ca3af", fontSize: 12 }}>Note: {error}</p>}
+      {error && (
+        <p style={{ marginTop: 12, color: "#9ca3af", fontSize: 12 }}>
+          Note: {error}
+        </p>
+      )}
     </main>
   );
 }
