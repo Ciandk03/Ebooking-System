@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { userService } from '../../../services/database';
 import { encrypt, hashPassword, decrypt, encryptPaymentCard } from '../../../utils/encryption';
 import { PaymentCard } from '../../../types/database';
+import { sendRegistrationEmail } from '../../../utils/mailer';
+export const runtime = 'nodejs';
 
 //register user
 export async function POST(request: NextRequest) {
@@ -60,7 +62,16 @@ export async function POST(request: NextRequest) {
         address: body.address, // Store as string, will be parsed by app
         payment: encryptedPayment
         });
-        
+        try {
+          await sendRegistrationEmail({
+            to: body.email,
+            name: body.name
+          });
+          console.log('API: Registration email sent');
+        } catch (mailErr) {
+          console.error('API: Failed to send registration email:', mailErr);
+          // Intentionally do NOT fail the request — user is already created.
+        }
         console.log(`API: User created successfully with ID: ${userId}`);
         return NextResponse.json({
         success: true,
