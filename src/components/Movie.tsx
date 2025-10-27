@@ -77,8 +77,46 @@ const styles: Record<string, React.CSSProperties> = {
   subhead: { marginTop: 14, fontWeight: 900, color: UGA.white },
 };
 
-
 const SHOWTIMES = ["2:00 PM", "5:00 PM", "8:00 PM"];
+
+// RANDOM DATE GENERATOR DELETE WHEN ADDING ACTUAL DATES FROM DB
+function hashString(s: string) {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+function seededRand(seed: number) {
+  let x = seed || 123456789;
+  return () => {
+    x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
+    return ((x >>> 0) % 1_000_000) / 1_000_000;
+  };
+}
+function isoForDayOffset(offset: number) {
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate() + offset);
+  return d.toISOString().slice(0,10);
+}
+function labelForISO(iso: string) {
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString(undefined, { weekday: "short", month: "numeric", day: "numeric" });
+}
+function randomDatesForMovie(m: Movie, lookaheadDays = 21): string[] {
+  const seed = hashString(String(m.id ?? m.title ?? "movie"));
+  const rand = seededRand(seed);
+  const count = 3 + Math.floor(rand() * 6); // 3..8
+  const set = new Set<number>();
+  while (set.size < count) {
+    const r = Math.floor(Math.pow(rand(), 1.7) * lookaheadDays);
+    set.add(r);
+  }
+  return Array.from(set).sort((a,b)=>a-b).map(isoForDayOffset);
+}
+// END OF RANDOM DATE GENERATOR LOOK FOR NEW WAY TO GET DATES FROM DB 
 
 function deriveStatus(m: Movie) {
   if (m.currentlyRunning) return m.currentlyRunning ? "RUNNING" : "COMING_SOON";
@@ -87,13 +125,25 @@ function deriveStatus(m: Movie) {
   return rel > new Date() ? "COMING_SOON" : "RUNNING";
 }
 
-export default function MovieCard({ m, onWatchTrailer }: { m: Movie; onWatchTrailer: (url: string) => void }) {
+export default function MovieCard({
+  m,
+  onWatchTrailer,
+}: {
+  m: Movie;
+  onWatchTrailer: (url: string) => void;
+}) {
   const router = useRouter();
+  const dates = randomDatesForMovie(m);
+
   return (
     <article style={styles.card}>
       <div style={styles.posterWrap}>
         {m.poster ? (
-          <img src={m.poster} alt={`${m.title} poster`} style={{ objectFit: "cover", width: "100%", height: "100%", position: "absolute", inset: 0 }} />
+          <img
+            src={m.poster}
+            alt={`${m.title} poster`}
+            style={{ objectFit: "cover", width: "100%", height: "100%", position: "absolute", inset: 0 }}
+          />
         ) : null}
       </div>
       <div style={styles.cardBody}>
@@ -104,7 +154,11 @@ export default function MovieCard({ m, onWatchTrailer }: { m: Movie; onWatchTrai
         {m.details && <p style={{ fontSize: 13, color: "#d1d5db" }}>{m.details}</p>}
         <div>
           {m.genres?.slice(0, 3).map((g) => <span key={g} style={styles.tag}>{g}</span>)}
-          {deriveStatus(m) === "COMING_SOON" && <span style={{ ...styles.tag, background: "#78350f", color: "#fef3c7", border: "1px solid #fbbf24" }}>Coming Soon</span>}
+          {deriveStatus(m) === "COMING_SOON" && (
+            <span style={{ ...styles.tag, background: "#78350f", color: "#fef3c7", border: "1px solid #fbbf24" }}>
+              Coming Soon
+            </span>
+          )}
         </div>
 
         <div style={styles.row}>
@@ -112,11 +166,42 @@ export default function MovieCard({ m, onWatchTrailer }: { m: Movie; onWatchTrai
           {m.trailer ? <button style={styles.btnGhost} onClick={() => onWatchTrailer(m.trailer!)}>Watch Trailer</button> : null}
         </div>
 
+        {/* Dates row */}
+        <div style={{ marginTop: 12, fontWeight: 700 }}>Dates</div>
+        <div style={styles.row}>
+          {dates.map((iso) => (
+            <button
+              key={iso}
+              style={styles.btnGhost}
+              onClick={() =>
+                router.push(
+                  `/Booking?movieId=${encodeURIComponent(m.id)}&title=${encodeURIComponent(
+                    m.title
+                  )}&date=${encodeURIComponent(iso)}`
+                )
+              }
+              aria-label={`Select date ${labelForISO(iso)}`}
+            >
+              {labelForISO(iso)}
+            </button>
+          ))}
+        </div>
+
+        {/* Showtimes row */}
         <div style={{ marginTop: 12, fontWeight: 700 }}>Showtimes</div>
         <div style={styles.row}>
           {SHOWTIMES.map((t) => (
-            <button key={t} style={styles.btnGhost}
-              onClick={() => router.push(`/Booking?movieId=${encodeURIComponent(m.id)}&title=${encodeURIComponent(m.title)}&showtime=${encodeURIComponent(t)}`)}>
+            <button
+              key={t}
+              style={styles.btnGhost}
+              onClick={() =>
+                router.push(
+                  `/Booking?movieId=${encodeURIComponent(m.id)}&title=${encodeURIComponent(
+                    m.title
+                  )}&showtime=${encodeURIComponent(t)}`
+                )
+              }
+            >
               {t}
             </button>
           ))}
@@ -125,3 +210,4 @@ export default function MovieCard({ m, onWatchTrailer }: { m: Movie; onWatchTrai
     </article>
   );
 }
+

@@ -102,7 +102,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: "rgba(0,0,0,0.6)",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center", //Test comment
+    justifyContent: "center",
     zIndex: 50,
   },
   modal: {
@@ -115,14 +115,54 @@ const styles: Record<string, React.CSSProperties> = {
   },
 };
 
+// --- NEW: tiny deterministic RNG + date helpers (duplicated in MovieCard) ---
+function hashString(s: string) {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+function seededRand(seed: number) {
+  // xorshift32
+  let x = seed || 123456789;
+  return () => {
+    x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
+    // map to [0,1)
+    return ((x >>> 0) % 1_000_000) / 1_000_000;
+  };
+}
+function isoForDayOffset(offset: number) {
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate() + offset);
+  return d.toISOString().slice(0,10); // YYYY-MM-DD
+}
+function labelForISO(iso: string) {
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString(undefined, { weekday: "short", month: "numeric", day: "numeric" }); // e.g., Mon 10/27
+}
+function randomDatesForMovie(m: Movie, lookaheadDays = 21): string[] {
+  const seed = hashString(String(m.id ?? m.title ?? "movie"));
+  const rand = seededRand(seed);
+  const count = 3 + Math.floor(rand() * 6); // 3..8 dates
+  const set = new Set<number>();
+  // bias toward nearer dates a bit
+  while (set.size < count) {
+    const r = Math.floor(Math.pow(rand(), 1.7) * lookaheadDays); // 0..20 skewed low
+    set.add(r);
+  }
+  return Array.from(set).sort((a,b)=>a-b).map(isoForDayOffset);
+}
+// --- end helpers ---
+
 function deriveStatus(m: Movie) {
   if (m.currentlyRunning) {
     return "RUNNING";
   } else {
     return "COMING_SOON";
   }
-  //if (!m.releaseDate) return "RUNNING";
-  //return new Date(m.releaseDate) > new Date() ? "COMING_SOON" : "RUNNING";
 }
 
 function ytId(url?: string) {
@@ -142,12 +182,15 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [genre, setGenre] = useState("ALL");
+
+  // --- NEW: day filter state ---
+  const [day, setDay] = useState<string>("ALL");
+
   const [tab, setTab] = useState<"RUNNING" | "COMING_SOON">("RUNNING");
   const [trailer, setTrailer] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    // Check if user is logged in
     const userData = localStorage.getItem("user");
     if (userData) {
       try {
@@ -176,13 +219,39 @@ export default function HomePage() {
     return ["ALL", ...Array.from(s).sort()];
   }, [movies]);
 
+  // --- NEW: precompute a date map per movie for filtering ---
+  const datesById = useMemo(() => {
+    const map = new Map<string, string[]>();
+    (movies || []).forEach(m => {
+      const key = String(m.id);
+      map.set(key, randomDatesForMovie(m));
+    });
+    return map;
+  }, [movies]);
+
+  // --- NEW: list of selectable days (next 21 days) ---
+  const selectableDays = useMemo(() => {
+    const days: { value: string; label: string }[] = [{ value: "ALL", label: "ALL DAYS" }];
+    for (let i = 0; i < 21; i++) {
+      const iso = isoForDayOffset(i);
+      days.push({ value: iso, label: labelForISO(iso) });
+    }
+    return days;
+  }, []);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return (movies || [])
       .filter((m) => deriveStatus(m) === tab)
       .filter((m) => (q ? m.title.toLowerCase().includes(q) : true))
-      .filter((m) => (genre === "ALL" ? true : m.genres?.includes(genre)));
-  }, [movies, query, genre, tab]);
+      .filter((m) => (genre === "ALL" ? true : m.genres?.includes(genre)))
+      // --- NEW: filter by day if selected ---
+      .filter((m) => {
+        if (day === "ALL") return true;
+        const ds = datesById.get(String(m.id)) || [];
+        return ds.includes(day);
+      });
+  }, [movies, query, genre, tab, day, datesById]);
 
   const runningCount = (movies || []).filter(
     (m) => deriveStatus(m) === "RUNNING"
@@ -216,10 +285,10 @@ export default function HomePage() {
 
           <div
             style={{
-              ...styles.searchRow,
               display: "flex",
               alignItems: "center",
               gap: 12,
+              flexWrap: "wrap",
             }}
           >
             <input
@@ -240,11 +309,26 @@ export default function HomePage() {
               ))}
             </select>
 
+            {/* NEW: Day filter */}
+            <select
+              style={styles.select}
+              value={day}
+              onChange={(e) => setDay(e.target.value)}
+              aria-label="Filter by day"
+            >
+              {selectableDays.map((d) => (
+                <option key={d.value} value={d.value}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+
             <button
               style={{ ...styles.ghostBtn, marginLeft: 4 }}
               onClick={() => {
                 setQuery("");
                 setGenre("ALL");
+                setDay("ALL"); // reset day too
               }}
             >
               Reset
