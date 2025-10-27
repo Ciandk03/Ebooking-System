@@ -204,7 +204,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: "none",
   },
 
-  // ---- NEW: Dates + Showtimes sections (matching UGA style) ----
+  // Dates + Showtimes sections (matching UGA style)
   showtimesSection: {
     marginTop: 32,
     padding: 24,
@@ -257,7 +257,7 @@ const styles: Record<string, React.CSSProperties> = {
 // keep in sync with Booking/MovieCard
 const SHOWTIMES = ["2:00 PM", "5:00 PM", "8:00 PM"];
 
-// ---- NEW: deterministic date helpers (same as on Home/MovieCard/Booking) ----
+// SAME HELPERS AS IN Movie.tsx TO KEEP DATES CONSISTENT
 function hashString(s: string) {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < s.length; i++) {
@@ -294,6 +294,7 @@ function randomDatesForMovie(seedKey: string, lookaheadDays = 21): string[] {
   }
   return Array.from(set).sort((a,b)=>a-b).map(isoForDayOffset);
 }
+// END OF SAME HELPERS AS IN Movie.tsx TO KEEP DATES CONSISTENT
 
 function deriveStatus(movie: MovieDetailsProps) {
   if (movie.currentlyRunning) return "RUNNING";
@@ -328,7 +329,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({
   const [hoveredShowtime, setHoveredShowtime] = useState<string | null>(null);
   const status = deriveStatus({ id, title, poster, rating, details, trailer, genres, duration, releaseDate, currentlyRunning, comingSoon });
 
-  // NEW: dates + selected date
+  // Dates + selected date
   const dateOptions = useMemo(() => randomDatesForMovie(id || title || 'movie'), [id, title]);
   const [selectedDate, setSelectedDate] = useState<string>('');
 
@@ -452,7 +453,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({
         </div>
       )}
 
-      {/* NEW: Dates + Showtimes sections */}
+      {/* Dates + Showtimes sections */}
       <div style={styles.showtimesSection}>
         <h3 style={styles.showtimesTitle}>Dates</h3>
         <div style={styles.pillsRow}>

@@ -115,7 +115,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
 };
 
-// --- NEW: tiny deterministic RNG + date helpers (duplicated in MovieCard) ---
+// SAME HELPERS AS IN Movie.tsx TO KEEP DATES CONSISTENT ---
 function hashString(s: string) {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < s.length; i++) {
@@ -155,7 +155,7 @@ function randomDatesForMovie(m: Movie, lookaheadDays = 21): string[] {
   }
   return Array.from(set).sort((a,b)=>a-b).map(isoForDayOffset);
 }
-// --- end helpers ---
+// END OF SAME HELPERS AS IN Movie.tsx TO KEEP DATES CONSISTENT ---
 
 function deriveStatus(m: Movie) {
   if (m.currentlyRunning) {
@@ -183,7 +183,7 @@ export default function HomePage() {
   const [query, setQuery] = useState("");
   const [genre, setGenre] = useState("ALL");
 
-  // --- NEW: day filter state ---
+  // day filter state
   const [day, setDay] = useState<string>("ALL");
 
   const [tab, setTab] = useState<"RUNNING" | "COMING_SOON">("RUNNING");
@@ -219,7 +219,7 @@ export default function HomePage() {
     return ["ALL", ...Array.from(s).sort()];
   }, [movies]);
 
-  // --- NEW: precompute a date map per movie for filtering ---
+  // precompute a date map per movie for filtering 
   const datesById = useMemo(() => {
     const map = new Map<string, string[]>();
     (movies || []).forEach(m => {
@@ -229,7 +229,7 @@ export default function HomePage() {
     return map;
   }, [movies]);
 
-  // --- NEW: list of selectable days (next 21 days) ---
+  // list of selectable days (next 21 days) 
   const selectableDays = useMemo(() => {
     const days: { value: string; label: string }[] = [{ value: "ALL", label: "ALL DAYS" }];
     for (let i = 0; i < 21; i++) {
@@ -245,7 +245,7 @@ export default function HomePage() {
       .filter((m) => deriveStatus(m) === tab)
       .filter((m) => (q ? m.title.toLowerCase().includes(q) : true))
       .filter((m) => (genre === "ALL" ? true : m.genres?.includes(genre)))
-      // --- NEW: filter by day if selected ---
+      // filter by day if selected
       .filter((m) => {
         if (day === "ALL") return true;
         const ds = datesById.get(String(m.id)) || [];
@@ -309,7 +309,7 @@ export default function HomePage() {
               ))}
             </select>
 
-            {/* NEW: Day filter */}
+            {/* Day filter */}
             <select
               style={styles.select}
               value={day}
