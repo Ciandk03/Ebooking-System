@@ -171,9 +171,9 @@ export async function PUT(request: NextRequest) {
     // Prepare update data
     const updateData: any = {
       name,
-      phone: phone || undefined,
-      address: address || undefined,
-      subscribeToPromotions: subscribeToPromotions !== undefined ? subscribeToPromotions : undefined
+      phone: phone || null,
+      address: address || null,
+      subscribeToPromotions: subscribeToPromotions !== null ? subscribeToPromotions : null
     };
 
     // Handle password update
@@ -185,7 +185,7 @@ export async function PUT(request: NextRequest) {
     // Handle payment cards update
     if (paymentCards && Array.isArray(paymentCards)) {
       if (paymentCards.length === 0) {
-        updateData.payment = undefined;
+        updateData.payment = null;
       } else {
         // Encrypt the first payment card (we only store one)
         const { encryptPaymentCard } = await import('../../../../utils/encryption');
