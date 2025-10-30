@@ -60,7 +60,9 @@ export async function POST(request: NextRequest) {
         phone: body.phone,
         password: hashedPassword,
         address: body.address, // Store as string, will be parsed by app
-        payment: encryptedPayment
+        payment: encryptedPayment,
+        active: true,
+        isAdmin: false
         });
         try {
           await sendRegistrationEmail({

@@ -63,6 +63,8 @@ export interface User {
   role?: 'user' | 'admin'; // User role
   createdAt: Date;
   updatedAt: Date;
+  isAdmin: boolean;
+  active: boolean;
 }
 
 export interface Theater {
