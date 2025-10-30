@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         
         // Encrypt password and payment info
         const hashedPassword = hashPassword(body.password);
-        let encryptedPayment = undefined;
+        let encryptedPayment: string | undefined = undefined;
         
         console.log('API: Password being processed:', body.password ? '[PASSWORD PROVIDED]' : '[NO PASSWORD]');
         console.log('API: Hashed password:', hashedPassword);
@@ -52,8 +52,8 @@ export async function POST(request: NextRequest) {
             console.log('API: Payment card encrypted successfully');
         } else {
             console.log('API: No payment card information provided');
-            //make payment null if empty
-            encryptedPayment = null;
+            // make payment undefined if empty
+            encryptedPayment = undefined;
         }
 
         //make empty optional fields null instead of undefined

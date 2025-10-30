@@ -190,6 +190,9 @@ export default function HomePage() {
   const [trailer, setTrailer] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
 
+
+  const isAdminUser = (user?.role === 'admin') || (user?.isAdmin === true);
+
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (userData) {
@@ -341,11 +344,9 @@ export default function HomePage() {
                 </span>
                 <button
                   style={styles.ghostBtn}
-                  onClick={() =>
-                    router.push(user.role === "admin" ? "/admin" : "/dashboard")
-                  }
+                  onClick={() => router.push(isAdminUser ? "/admin" : "/dashboard")}
                 >
-                  {user.role === "admin" ? "Admin Panel" : "Account"}
+                  {isAdminUser ? "Admin Panel" : "Account"}
                 </button>
                 <button style={styles.registerBtn} onClick={handleLogout}>
                   Logout

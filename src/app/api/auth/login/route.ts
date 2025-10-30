@@ -55,11 +55,14 @@ export async function POST(request: NextRequest) {
 
         // Generate JWT token
         const tokenExpiry = rememberMe ? '30d' : '1d';
+        
+        const derivedRole = (user as any).isAdmin ? 'admin' : ((user as any).role || 'user');
+
         const token = jwt.sign(
             { 
                 userId: user.id, 
                 email: user.email,
-                role: user.role || 'user'
+                role: derivedRole
             },
             JWT_SECRET,
             { expiresIn: tokenExpiry }
@@ -72,7 +75,9 @@ export async function POST(request: NextRequest) {
             id: user.id,
             name: user.name,
             email: user.email,
-            role: user.role || 'user',
+            
+            isAdmin: (user as any).isAdmin || false,
+            role: derivedRole,
             phone: user.phone,
             address: user.address
         };
