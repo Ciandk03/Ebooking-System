@@ -60,7 +60,6 @@ export interface User {
   address?: string; // Optional address as string
   payment?: string; // Optional encrypted payment card info (JSON string)
   subscribeToPromotions?: boolean; // Optional promotions subscription
-  role?: 'user' | 'admin'; // User role
   createdAt: Date;
   updatedAt: Date;
   isAdmin: boolean;

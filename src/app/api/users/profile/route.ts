@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
       address: user.address || '',
       paymentCards: paymentCards as any[],
       subscribeToPromotions: user.subscribeToPromotions || false,
-      role: user.role || 'user'
+      isAdmin: user.isAdmin
     };
 
     console.log('API: Profile fetched successfully for user:', user.email);
