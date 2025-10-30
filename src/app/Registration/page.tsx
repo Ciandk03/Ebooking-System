@@ -87,29 +87,50 @@ const styles: Record<string, React.CSSProperties> = {
   success: {
     color: "#22c55e",
   },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 700,
+    color: UGA.white,
+    borderBottom: `2px solid ${UGA.red}`,
+    paddingBottom: 8,
+    marginTop: 8,
+  },
+  checkboxContainer: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 8,
+  },
+  checkbox: {
+    width: 16,
+    height: 16,
+    accentColor: UGA.red,
+  },
+  checkboxLabel: {
+    fontSize: 14,
+    color: UGA.gray,
+  },
 };
 
 export default function RegistrationPage() {
-  
   const params = useParams();
   const router = useRouter();
 
-  
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  
-  
+
   const [cardNumber, setCardNumber] = useState("");
   const [cardHolderName, setCardHolderName] = useState("");
   const [expiryMonth, setExpiryMonth] = useState("");
   const [expiryYear, setExpiryYear] = useState("");
   const [cvv, setCvv] = useState("");
   const [billingAddress, setBillingAddress] = useState("");
-  
-  
+
+  const [subscribeToPromotions, setSubscribeToPromotions] = useState(false); 
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -124,7 +145,6 @@ export default function RegistrationPage() {
       return;
     }
 
-    
     if (cardNumber && !validateCardNumber(cardNumber)) {
       setError("Please enter a valid card number.");
       return;
@@ -132,11 +152,10 @@ export default function RegistrationPage() {
 
     setLoading(true);
     try {
-      
       let paymentCardData = null;
       if (cardNumber && cardHolderName && expiryMonth && expiryYear && cvv) {
         paymentCardData = {
-          cardNumber: cardNumber.replace(/\D/g, ''), 
+          cardNumber: cardNumber.replace(/\D/g, ''),
           cardHolderName,
           expiryMonth,
           expiryYear,
@@ -145,7 +164,6 @@ export default function RegistrationPage() {
         };
       }
 
-      
       const userData = {
         name: username,
         email,
@@ -153,11 +171,11 @@ export default function RegistrationPage() {
         phone: phone || undefined,
         address: address || undefined,
         payment: paymentCardData,
+        subscribeToPromotions,
       };
 
       console.log('Registration: Submitting user data:', { ...userData, password: '[ENCRYPTED]' });
 
-    
       const response = await fetch('/api/users', {
         method: 'POST',
         headers: {
@@ -184,8 +202,8 @@ export default function RegistrationPage() {
       setExpiryYear("");
       setCvv("");
       setBillingAddress("");
+      setSubscribeToPromotions(false);
 
-      
       setTimeout(() => {
         router.push("/");
       }, 1500);
@@ -248,12 +266,27 @@ export default function RegistrationPage() {
             onChange={(e) => setAddress(e.target.value)}
           />
 
-          
+          {/* Promo section */}
+          <h3 style={styles.sectionTitle}>Preferences</h3>
+          <div style={styles.checkboxContainer}>
+            <input
+              id="promotions"
+              type="checkbox"
+              style={styles.checkbox}
+              checked={subscribeToPromotions}
+              onChange={(e) => setSubscribeToPromotions(e.target.checked)}
+            />
+            <label htmlFor="promotions" style={styles.checkboxLabel}>
+              Subscribe to promotional emails and special offers
+            </label>
+          </div>
+
+          {/* Payment section */}
           <div style={{ borderTop: `1px solid ${UGA.border}`, paddingTop: 16, marginTop: 8 }}>
             <h3 style={{ color: UGA.white, marginBottom: 16, fontSize: 18, fontWeight: 600 }}>
               Payment Information (Optional)
             </h3>
-            
+
             <div style={{ padding: '8px 0' }}>
               <input
                 style={{
