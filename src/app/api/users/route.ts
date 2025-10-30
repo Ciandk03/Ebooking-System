@@ -52,6 +52,16 @@ export async function POST(request: NextRequest) {
             console.log('API: Payment card encrypted successfully');
         } else {
             console.log('API: No payment card information provided');
+            //make payment null if empty
+            encryptedPayment = null;
+        }
+
+        //make empty optional fields null instead of undefined
+        if(!body.phone){
+            body.phone = null;
+        }
+        if(!body.address) {
+            body.address = null;
         }
         
         const userId = await userService.createUser({
