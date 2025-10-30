@@ -52,8 +52,8 @@ export async function POST(request: NextRequest) {
             console.log('API: Payment card encrypted successfully');
         } else {
             console.log('API: No payment card information provided');
-            // make payment undefined if empty
-            encryptedPayment = undefined;
+            // make payment null if empty
+            encryptedPayment = null;
         }
 
         //make empty optional fields null instead of undefined
@@ -72,7 +72,8 @@ export async function POST(request: NextRequest) {
         address: body.address, // Store as string, will be parsed by app
         payment: encryptedPayment,
         active: true,
-        isAdmin: false
+        isAdmin: false,
+        subscribeToPromotions: body.subscribeToPromotions
         });
         try {
           await sendRegistrationEmail({
