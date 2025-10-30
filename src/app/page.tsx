@@ -216,6 +216,26 @@ export default function HomePage() {
     })();
   }, []);
 
+  
+  useEffect(() => {
+    const handler = (e: any) => {
+      if (e?.detail) setUser(e.detail);
+    };
+    window.addEventListener('user-updated', handler as EventListener);
+    
+    const storageHandler = (ev: StorageEvent) => {
+      if (ev.key === 'user' && ev.newValue) {
+        try { setUser(JSON.parse(ev.newValue)); } catch {}
+      }
+    };
+    window.addEventListener('storage', storageHandler as any);
+
+    return () => {
+      window.removeEventListener('user-updated', handler as EventListener);
+      window.removeEventListener('storage', storageHandler as any);
+    };
+  }, []);
+
   const allGenres = useMemo(() => {
     const s = new Set<string>();
     movies?.forEach((m) => m.genres?.forEach((g) => s.add(g)));

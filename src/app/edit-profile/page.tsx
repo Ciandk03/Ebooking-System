@@ -331,6 +331,23 @@ export default function EditProfilePage() {
       setPaymentCards(result.data.paymentCards || []);
       setSubscribeToPromotions(result.data.subscribeToPromotions || false);
       
+      try {
+        const storedUser = {
+          id: result.data.id,
+          name: result.data.name,
+          email: result.data.email,
+          role: result.data.role || (result.data.isAdmin ? 'admin' : 'user'),
+          isAdmin: result.data.isAdmin || false,
+          phone: result.data.phone || '',
+          address: result.data.address || '',
+        };
+        localStorage.setItem('user', JSON.stringify(storedUser));
+        
+        try { window.dispatchEvent(new CustomEvent('user-updated', { detail: storedUser })); } catch {}
+      } catch (storageErr) {
+        console.error('Failed to update local user cache:', storageErr);
+      }
+      
     } catch (err) {
       console.error('Fetch profile error:', err);
       setError(err instanceof Error ? err.message : "Failed to load profile");
