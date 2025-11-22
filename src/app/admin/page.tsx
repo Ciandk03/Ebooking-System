@@ -240,74 +240,86 @@ export default function AdminPage() {
         </div>
 
         <div style={styles.content}>
-          <div style={styles.card}>
-            <h2 style={styles.cardTitle}>User Management</h2>
-            <div style={styles.cardContent}>
-              <p>Manage user accounts, roles, and permissions.</p>
+          <div style={{ ...styles.card, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <h2 style={styles.cardTitle}>Add Movie</h2>
+              <div style={styles.cardContent}>
+                <p>Create a new movie with full metadata: title, poster, cast, genres, duration, trailer and timestamps.</p>
+              </div>
+            </div>
+            <div style={{ marginTop: 16, textAlign: 'right' }}>
               <button
                 style={{
                   ...styles.logoutButton,
-                  marginTop: 16,
-                  background: UGA.dark,
+                  background: UGA.red,
                   border: `1px solid ${UGA.border}`,
                 }}
-                onClick={() => router.push('/admin/users')}
+                onClick={() => router.push('/admin/movies/add')}
               >
-                Manage Users
+                Add Movie
               </button>
             </div>
           </div>
 
-          <div style={styles.card}>
-            <h2 style={styles.cardTitle}>Movie Management</h2>
-            <div style={styles.cardContent}>
-              <p>Add, edit, and manage movie listings.</p>
+          <div style={{ ...styles.card, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <h2 style={styles.cardTitle}>Create Showtime</h2>
+              <div style={styles.cardContent}>
+                <p>Schedule a showtime for a movie (date, time, showroom, seats, price). Overlap checks prevent conflicting showtimes.</p>
+              </div>
+            </div>
+            <div style={{ marginTop: 16, textAlign: 'right' }}>
               <button
                 style={{
                   ...styles.logoutButton,
-                  marginTop: 16,
-                  background: UGA.dark,
+                  background: UGA.red,
                   border: `1px solid ${UGA.border}`,
                 }}
-                onClick={() => router.push('/admin/movies')}
+                onClick={() => router.push('/admin/movies/showtimes')}
               >
-                Manage Movies
+                Create Showtime
               </button>
             </div>
           </div>
 
-          <div style={styles.card}>
-            <h2 style={styles.cardTitle}>Booking Management</h2>
-            <div style={styles.cardContent}>
-              <p>View and manage all bookings and reservations.</p>
+          <div style={{ ...styles.card, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <h2 style={styles.cardTitle}>Current Movies</h2>
+              <div style={styles.cardContent}>
+                <p>Browse existing movies in the system, view basic metadata and poster previews.</p>
+              </div>
+            </div>
+            <div style={{ marginTop: 16, textAlign: 'right' }}>
               <button
                 style={{
                   ...styles.logoutButton,
-                  marginTop: 16,
-                  background: UGA.dark,
+                  background: UGA.red,
                   border: `1px solid ${UGA.border}`,
                 }}
-                onClick={() => router.push('/admin/bookings')}
+                onClick={() => router.push('/admin/movies/list')}
               >
-                Manage Bookings
+                Current Movies
               </button>
             </div>
           </div>
 
-          <div style={styles.card}>
-            <h2 style={styles.cardTitle}>System Settings</h2>
-            <div style={styles.cardContent}>
-              <p>Configure system settings and preferences.</p>
+          <div style={{ ...styles.card, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <h2 style={styles.cardTitle}>Create Promotion</h2>
+              <div style={styles.cardContent}>
+                <p>Create promo codes (code, dates, discount) and send the code to all subscribed users.</p>
+              </div>
+            </div>
+            <div style={{ marginTop: 16, textAlign: 'right' }}>
               <button
                 style={{
                   ...styles.logoutButton,
-                  marginTop: 16,
-                  background: UGA.dark,
+                  background: UGA.red,
                   border: `1px solid ${UGA.border}`,
                 }}
-                onClick={() => router.push('/admin/settings')}
+                onClick={() => router.push('/admin/movies/promotions')}
               >
-                System Settings
+                Create Promotion
               </button>
             </div>
           </div>

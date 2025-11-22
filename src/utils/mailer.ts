@@ -97,6 +97,30 @@ Visit the site: ${process.env.APP_URL || ""}`;
   });
 }
 
+export async function sendPromotionEmail(opts: {
+  to: string;
+  name?: string;
+  code: string;
+  startDate: string;
+  endDate: string;
+  discount: number;
+}) {
+  const { to, name, code, startDate, endDate, discount } = opts;
+
+  const subject = `Promotion: ${code} - ${discount}% off`; 
+  const text = `Hi ${name || 'there'},\n\nWe've launched a promotion: use code ${code} to get ${discount}% off between ${startDate} and ${endDate}.\n\nEnjoy the movies!`;
+
+  const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#000;padding:32px 0;color:#fff"><div style="max-width:560px;margin:0 auto;background:#0b0b0b;border:1px solid #2a2a2a;border-radius:12px;padding:24px"><h1 style="margin:0 0 8px;font-size:24px;font-weight:900;letter-spacing:-0.5px">Cinema E-Booking</h1><p style="color:#d1d5db;margin:0 0 12px">Hi ${escapeHtml(name || 'there')},</p><p style="margin:0 0 16px">Good news — we've just launched a promotion.</p><p style="background:#111;padding:12px;border-radius:8px;color:#fff;font-weight:700">Code: ${code} — ${discount}% off</p><p style="margin:8px 0 16px;color:#d1d5db">Valid: ${startDate} – ${endDate}</p><a href="${process.env.APP_URL || '#'}" style="display:inline-block;background:#ba0c2f;color:#fff;text-decoration:none;padding:12px 16px;border-radius:10px;font-weight:700">Use the code on Cinema E-Booking</a><p style="color:#d1d5db;margin:16px 0 0">Enjoy the show!</p></div></div>`;
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM!,
+    to,
+    subject,
+    text,
+    html,
+  });
+}
+
 function escapeHtml(s: string) {
   return s
     .replace(/&/g, "&amp;")

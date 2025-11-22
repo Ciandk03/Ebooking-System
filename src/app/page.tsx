@@ -406,6 +406,25 @@ export default function HomePage() {
             )}
           </div>
         </div>
+        {/* Statistics banner */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginTop: 18 }}>
+          <div style={{ background: UGA.nearBlack, padding: 12, borderRadius: 10, textAlign: 'center' }}>
+            <div style={{ fontSize: 20, fontWeight: 800 }}>{150}</div>
+            <div style={{ color: UGA.gray, marginTop: 4 }}>Total Users</div>
+          </div>
+          <div style={{ background: UGA.nearBlack, padding: 12, borderRadius: 10, textAlign: 'center' }}>
+            <div style={{ fontSize: 20, fontWeight: 800 }}>{25}</div>
+            <div style={{ color: UGA.gray, marginTop: 4 }}>Movies</div>
+          </div>
+          <div style={{ background: UGA.nearBlack, padding: 12, borderRadius: 10, textAlign: 'center' }}>
+            <div style={{ fontSize: 20, fontWeight: 800 }}>{1200}</div>
+            <div style={{ color: UGA.gray, marginTop: 4 }}>Bookings</div>
+          </div>
+          <div style={{ background: UGA.nearBlack, padding: 12, borderRadius: 10, textAlign: 'center' }}>
+            <div style={{ fontSize: 20, fontWeight: 800 }}>${'45,000'}</div>
+            <div style={{ color: UGA.gray, marginTop: 4 }}>Revenue</div>
+          </div>
+        </div>
       </div>
 
       <div style={styles.tabs}>
