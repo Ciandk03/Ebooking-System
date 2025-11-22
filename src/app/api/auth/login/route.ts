@@ -41,6 +41,14 @@ export async function POST(request: NextRequest) {
             }, { status: 401 });
         }
 
+        if (!user.active) {
+            console.log('API: Inactive (unverified) user attempted login:', email);
+            return NextResponse.json({
+                success: false,
+                error: 'Please verify your email before signing in.'
+            }, { status: 403 });
+        }
+
         // Verify password
         const hashedInputPassword = hashPassword(password);
         const isPasswordValid = hashedInputPassword === user.password;

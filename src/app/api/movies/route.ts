@@ -61,7 +61,10 @@ export async function POST(request: NextRequest) {
       currentlyRunning: body.currentlyRunning || false,
       comingSoon: body.comingSoon || false,
       duration: body.duration || 120,
-      releaseDate: body.releaseDate || new Date().toISOString().split('T')[0]
+      releaseDate: body.releaseDate || new Date().toISOString().split('T')[0],
+      cast: body.cast || [],
+      director: body.director || '',
+      producer: body.producer || ''
     });
     
     console.log(`API: Movie created successfully with ID: ${movieId}`);

@@ -9,12 +9,24 @@ const toDate = (ts?: firestore.Timestamp) => ts?.toDate() || new Date();
 
 function mapDoc<T>(doc: firestore.QueryDocumentSnapshot | firestore.DocumentSnapshot): T {
   const data = doc.data() as any;
-  return {
+  const mapped: any = {
     id: doc.id,
     ...data,
     createdAt: toDate(data?.createdAt),
     updatedAt: toDate(data?.updatedAt),
-  } as T;
+  };
+
+  if ('verificationExpires' in data) {
+    mapped.verificationExpires = data?.verificationExpires
+      ? toDate(data.verificationExpires)
+      : null;
+  }
+
+  if ('verifiedAt' in data) {
+    mapped.verifiedAt = data?.verifiedAt ? toDate(data.verifiedAt) : null;
+  }
+
+  return mapped as T;
 }
 
 // Movies
@@ -300,6 +312,17 @@ export const userService = {
       await firestore.deleteDoc(docRef);
     } catch (error) {
       throw new Error(`deleteUser failed: ${error}`);
+    }
+  },
+  async getUserByVerificationToken(token: string): Promise<User | null> {
+    console.log(`Fetching user by verification token`);
+    try {
+      const q = firestore.query(usersCollection, firestore.where('verificationToken', '==', token));
+      const snapshot = await firestore.getDocs(q);
+      if (snapshot.empty) return null;
+      return mapDoc<User>(snapshot.docs[0]);
+    } catch (error) {
+      throw new Error(`getUserByVerificationToken failed: ${error}`);
     }
   },
 };

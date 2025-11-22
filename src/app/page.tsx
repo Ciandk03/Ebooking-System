@@ -362,12 +362,24 @@ export default function HomePage() {
                 <span style={{ fontSize: 14, color: UGA.gray }}>
                   Welcome, {user.name}
                 </span>
+                {/* Always show Edit Profile for signed-in users */}
                 <button
                   style={styles.ghostBtn}
-                  onClick={() => router.push(isAdminUser ? "/admin" : "/dashboard")}
+                  onClick={() => router.push('/edit-profile')}
                 >
-                  {isAdminUser ? "Admin Panel" : "Account"}
+                  Edit Profile
                 </button>
+
+                {/* If user is an admin also show Admin Panel alongside Edit Profile */}
+                {isAdminUser && (
+                  <button
+                    style={styles.ghostBtn}
+                    onClick={() => router.push('/admin')}
+                  >
+                    Admin Panel
+                  </button>
+                )}
+
                 <button style={styles.registerBtn} onClick={handleLogout}>
                   Logout
                 </button>

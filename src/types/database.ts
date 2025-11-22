@@ -12,6 +12,9 @@ export interface Movie {
   comingSoon: boolean;
   duration: number; // in minutes
   releaseDate: string;
+  cast?: string[];
+  director?: string;
+  producer?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -64,6 +67,9 @@ export interface User {
   updatedAt: Date;
   isAdmin: boolean;
   active: boolean;
+  verificationToken?: string | null;
+  verificationExpires?: Date | null;
+  verifiedAt?: Date | null;
 }
 
 export interface Theater {

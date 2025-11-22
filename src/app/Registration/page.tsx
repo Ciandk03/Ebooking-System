@@ -190,7 +190,7 @@ export default function RegistrationPage() {
         throw new Error(result.error || 'Registration failed');
       }
 
-      setSuccess("Account created successfully!");
+      setSuccess("Account created! Check your email to verify before signing in.");
       setUsername("");
       setEmail("");
       setPassword("");

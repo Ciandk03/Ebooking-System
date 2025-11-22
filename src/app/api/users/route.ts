@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { userService } from '../../../services/database';
 import { encrypt, hashPassword, decrypt, encryptPaymentCard } from '../../../utils/encryption';
 import { PaymentCard } from '../../../types/database';
-import { sendRegistrationEmail } from '../../../utils/mailer';
+import { sendVerificationEmail } from '../../../utils/mailer';
+import { randomBytes } from 'crypto';
 export const runtime = 'nodejs';
 
 //register user
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
         
         // Encrypt password and payment info
         const hashedPassword = hashPassword(body.password);
-        let encryptedPayment: string | undefined = undefined;
+        let encryptedPayment: string | null = null;
         
         console.log('API: Password being processed:', body.password ? '[PASSWORD PROVIDED]' : '[NO PASSWORD]');
         console.log('API: Hashed password:', hashedPassword);
@@ -52,7 +53,6 @@ export async function POST(request: NextRequest) {
             console.log('API: Payment card encrypted successfully');
         } else {
             console.log('API: No payment card information provided');
-            // make payment null if empty
             encryptedPayment = null;
         }
 
@@ -64,6 +64,9 @@ export async function POST(request: NextRequest) {
             body.address = null;
         }
         
+        const verificationToken = randomBytes(32).toString('hex');
+        const verificationExpires = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24 hours
+
         const userId = await userService.createUser({
         name: body.name,
         email: body.email,
@@ -71,25 +74,33 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         address: body.address, // Store as string, will be parsed by app
         payment: encryptedPayment,
-        active: true,
+        active: false,
         isAdmin: false,
-        subscribeToPromotions: body.subscribeToPromotions
+        subscribeToPromotions: body.subscribeToPromotions,
+        verificationToken,
+        verificationExpires,
+        verifiedAt: null
         });
         try {
-          await sendRegistrationEmail({
+          const verifyUrlBase = process.env.APP_URL || '';
+          const verifyUrl = verifyUrlBase
+            ? `${verifyUrlBase.replace(/\/$/, '')}/api/auth/verify?token=${verificationToken}`
+            : `${request.nextUrl.origin}/api/auth/verify?token=${verificationToken}`;
+          await sendVerificationEmail({
             to: body.email,
-            name: body.name
+            name: body.name,
+            verifyUrl
           });
-          console.log('API: Registration email sent');
+          console.log('API: Verification email sent');
         } catch (mailErr) {
-          console.error('API: Failed to send registration email:', mailErr);
+          console.error('API: Failed to send verification email:', mailErr);
           // Intentionally do NOT fail the request — user is already created.
         }
         console.log(`API: User created successfully with ID: ${userId}`);
         return NextResponse.json({
         success: true,
         data: { id: userId },
-        message: 'User created successfully'
+        message: 'User created successfully. Please verify your email to activate your account.'
         }, { status: 201 });
         
     } catch (error) {

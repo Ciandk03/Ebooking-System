@@ -104,6 +104,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const isAdminUser = Boolean(user?.isAdmin || user?.role === 'admin');
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -246,6 +247,18 @@ export default function DashboardPage() {
                 >
                   Browse Movies
                 </button>
+                {isAdminUser && (
+                  <button
+                    style={{
+                      ...styles.logoutButton,
+                      background: UGA.dark,
+                      border: `1px solid ${UGA.border}`,
+                    }}
+                    onClick={() => router.push('/admin')}
+                  >
+                    Admin Panel
+                  </button>
+                )}
               </div>
             </div>
           </div>

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 const UGA = {
@@ -127,6 +127,7 @@ const styles: Record<string, React.CSSProperties> = {
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -134,6 +135,35 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    const status = searchParams.get('verified');
+    if (!status) return;
+
+    const statusMessages: Record<string, { success?: string; error?: string }> = {
+      '1': { success: 'Your email has been verified. You can sign in now.' },
+      missing: { error: 'Verification link was missing a token. Please use the link in your email.' },
+      invalid: { error: 'That verification link is no longer valid.' },
+      expired: { error: 'Your verification link expired. Request a new one by registering again.' },
+      already: { error: 'This account is already verified. Please sign in.' },
+      error: { error: 'Something went wrong verifying your email. Please try again.' },
+    };
+
+    const message = statusMessages[status];
+    if (message?.success) {
+      setSuccess(message.success);
+    } else if (message?.error) {
+      setError(message.error);
+    }
+
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('verified');
+      const nextSearch = url.searchParams.toString();
+      const nextUrl = `${url.pathname}${nextSearch ? `?${nextSearch}` : ''}`;
+      window.history.replaceState({}, document.title, nextUrl);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

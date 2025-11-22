@@ -15,6 +15,9 @@ interface MovieDetailsProps {
   releaseDate?: string;
   currentlyRunning?: boolean;
   comingSoon?: boolean;
+  cast?: string[];
+  director?: string;
+  producer?: string;
 }
 
 const UGA = {
@@ -144,6 +147,36 @@ const styles: Record<string, React.CSSProperties> = {
   },
   infoValue: {
     fontSize: 16,
+    fontWeight: 600,
+  },
+  creditsSection: {
+    padding: 24,
+    borderRadius: 16,
+    border: `1px solid ${UGA.border}`,
+    background: UGA.nearBlack,
+    marginBottom: 24,
+  },
+  creditsTitle: {
+    fontSize: 20,
+    fontWeight: 700,
+    marginBottom: 16,
+  },
+  creditsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: 16,
+  },
+  castChips: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  castChip: {
+    padding: "6px 12px",
+    borderRadius: 999,
+    background: UGA.dark,
+    border: `1px solid ${UGA.border}`,
+    fontSize: 13,
     fontWeight: 600,
   },
   actions: {
@@ -323,7 +356,10 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({
   duration,
   releaseDate,
   currentlyRunning,
-  comingSoon
+  comingSoon,
+  cast,
+  director,
+  producer
 }) => {
   const router = useRouter();
   const [hoveredShowtime, setHoveredShowtime] = useState<string | null>(null);
@@ -426,6 +462,37 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({
                 Watch Trailer
               </button>
             )}
+          </div>
+
+          {/* Always show the credits section; show placeholders when data is missing so admins/users can see the fields */}
+          <div style={styles.creditsSection}>
+            <h3 style={styles.creditsTitle}>Behind the Scenes</h3>
+            <div style={styles.creditsGrid}>
+              <div style={styles.infoItem}>
+                <span style={styles.infoLabel}>Director</span>
+                <span style={styles.infoValue}>{director || '—'}</span>
+              </div>
+
+              <div style={styles.infoItem}>
+                <span style={styles.infoLabel}>Producer</span>
+                <span style={styles.infoValue}>{producer || '—'}</span>
+              </div>
+
+              <div style={styles.infoItem}>
+                <span style={styles.infoLabel}>Cast</span>
+                {cast && cast.length > 0 ? (
+                  <div style={styles.castChips}>
+                    {cast.map((member) => (
+                      <span key={member} style={styles.castChip}>
+                        {member}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span style={styles.infoValue}>—</span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

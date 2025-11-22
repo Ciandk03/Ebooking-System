@@ -150,6 +150,9 @@ export default function MovieDetailPage() {
           releaseDate={movie.releaseDate}
           currentlyRunning={movie.currentlyRunning}
           comingSoon={movie.comingSoon}
+          cast={movie.cast || []}
+          director={movie.director}
+          producer={movie.producer}
         />
       </div>
     </div>

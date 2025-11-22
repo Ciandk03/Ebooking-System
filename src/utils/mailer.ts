@@ -41,24 +41,24 @@ If you didn't request this, you can ignore this email.`;
   });
 }
 
-export async function sendRegistrationEmail(opts: {
+export async function sendVerificationEmail(opts: {
   to: string;
   name: string;
+  verifyUrl: string;
 }) {
-  const { to, name } = opts;
+  const { to, name, verifyUrl } = opts;
 
-  const subject = "You have registered – Cinema E-Booking";
+  const subject = "Verify your email – Cinema E-Booking";
   const text = `Hi ${name || "there"},
 
-You have been registered!
-Thanks for creating an account with the Cinema E-Booking.
+Please confirm your email to activate your Cinema E-Booking account.
+Click the link below to finish setting things up:
 
-Visit the site: ${process.env.APP_URL || ""}`;
+${verifyUrl}
 
-  const appUrl = process.env.APP_URL || "";
-  const visitLink = appUrl ? `<a href="${appUrl}" style="display:inline-block;background:#ba0c2f;color:#fff;text-decoration:none;padding:12px 16px;border-radius:10px;font-weight:700">Visit the site</a>` : "";
-  
-  const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#000;padding:32px 0;color:#fff"><div style="max-width:560px;margin:0 auto;background:#0b0b0b;border:1px solid #2a2a2a;border-radius:12px;padding:24px"><h1 style="margin:0 0 8px;font-size:24px;font-weight:900;letter-spacing:-0.5px">Cinema E-Booking</h1><p style="color:#d1d5db;margin:0 0 12px">Hi ${escapeHtml(name) || "there"},</p><p style="margin:0 0 16px"><strong>You have registered.</strong><br/>Thanks for creating an account with Cinema E-Booking.</p>${visitLink}</div></div>`;
+If you didn't create this account, you can ignore this email.`;
+
+  const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#000;padding:32px 0;color:#fff"><div style="max-width:560px;margin:0 auto;background:#0b0b0b;border:1px solid #2a2a2a;border-radius:12px;padding:24px"><h1 style="margin:0 0 8px;font-size:24px;font-weight:900;letter-spacing:-0.5px">Cinema E-Booking</h1><p style="color:#d1d5db;margin:0 0 12px">Hi ${escapeHtml(name) || "there"},</p><p style="margin:0 0 16px">Please confirm your email so we can activate your account.</p><a href="${verifyUrl}" style="display:inline-block;background:#ba0c2f;color:#fff;text-decoration:none;padding:12px 16px;border-radius:10px;font-weight:700">Verify email</a><p style="color:#d1d5db;margin:16px 0 0">If you didn't create this account, feel free to ignore this message.</p></div></div>`;
 
   await transporter.sendMail({
     from: process.env.EMAIL_FROM!,
