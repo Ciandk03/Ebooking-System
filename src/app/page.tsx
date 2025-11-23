@@ -365,9 +365,9 @@ export default function HomePage() {
                 {/* Always show Edit Profile for signed-in users */}
                 <button
                   style={styles.ghostBtn}
-                  onClick={() => router.push('/edit-profile')}
+                  onClick={() => router.push('/dashboard')}
                 >
-                  Edit Profile
+                  Account
                 </button>
 
                 {/* If user is an admin also show Admin Panel alongside Edit Profile */}
