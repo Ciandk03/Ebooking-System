@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { inputStyle, primaryButton, secondaryButton, titleStyle, cardStyle, messageStyle } from '../adminMovieStyles';
+import { Movie } from '@/types/database';
 
 export default function AddMoviePage() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function AddMoviePage() {
     e.preventDefault();
     setMessage(null);
     try {
-      const body: any = {
+      const body: Movie = {
         title: movieForm.title,
         poster: movieForm.poster,
         rating: Number(movieForm.rating),
@@ -30,10 +31,6 @@ export default function AddMoviePage() {
         currentlyRunning: Boolean(movieForm.currentlyRunning),
         comingSoon: Boolean(movieForm.comingSoon),
       };
-
-      // optional created/updated timestamps
-      if (movieForm.createdAt) body.createdAt = movieForm.createdAt;
-      if (movieForm.updatedAt) body.updatedAt = movieForm.updatedAt;
 
       const headers: any = { 'Content-Type': 'application/json' };
       const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;

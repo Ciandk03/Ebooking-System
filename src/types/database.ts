@@ -1,7 +1,6 @@
 // Database model interfaces for the ebooking system
 
 export interface Movie {
-  id: string;
   title: string;
   poster: string;
   rating: number;
@@ -15,8 +14,6 @@ export interface Movie {
   cast?: string[];
   director?: string;
   producer?: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface Showtime {
