@@ -3,6 +3,8 @@ import { userService } from '../../../../services/database';
 import { decryptPaymentCard, maskCardNumber } from '../../../../utils/encryption';
 import jwt from 'jsonwebtoken';
 
+export const runtime = 'nodejs';
+
 const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-key-change-in-production';
 
 // Helper function to verify JWT token

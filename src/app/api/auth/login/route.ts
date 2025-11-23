@@ -3,6 +3,8 @@ import { userService } from '../../../../services/database';
 import { hashPassword } from '../../../../utils/encryption';
 import jwt from 'jsonwebtoken';
 
+export const runtime = 'nodejs';
+
 const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-key-change-in-production';
 
 export async function POST(request: NextRequest) {
