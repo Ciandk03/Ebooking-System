@@ -85,7 +85,7 @@ Visit the site: ${process.env.APP_URL || ""}`;
 
   const appUrl = process.env.APP_URL || "";
   const visitLink = appUrl ? `<a href="${appUrl}" style="display:inline-block;background:#ba0c2f;color:#fff;text-decoration:none;padding:12px 16px;border-radius:10px;font-weight:700">Visit the site</a>` : "";
-  
+
   const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#000;padding:32px 0;color:#fff"><div style="max-width:560px;margin:0 auto;background:#0b0b0b;border:1px solid #2a2a2a;border-radius:12px;padding:24px"><h1 style="margin:0 0 8px;font-size:24px;font-weight:900;letter-spacing:-0.5px">Cinema E-Booking</h1><p style="color:#d1d5db;margin:0 0 12px">Hi ${escapeHtml(name) || "there"},</p><p style="margin:0 0 16px"><strong>Your profile has been successfully updated!</strong><br/>If you did not make this change, please contact our support team immediately.</p>${visitLink}</div></div>`;
 
   await transporter.sendMail({
@@ -101,16 +101,62 @@ export async function sendPromotionEmail(opts: {
   to: string;
   name?: string;
   code: string;
-  startDate: string;
-  endDate: string;
   discount: number;
+  startDate?: string;
+  endDate?: string;
 }) {
-  const { to, name, code, startDate, endDate, discount } = opts;
+  const { to, name, code, discount, startDate, endDate } = opts;
 
-  const subject = `Promotion: ${code} - ${discount}% off`; 
-  const text = `Hi ${name || 'there'},\n\nWe've launched a promotion: use code ${code} to get ${discount}% off between ${startDate} and ${endDate}.\n\nEnjoy the movies!`;
+  const appUrl = process.env.APP_URL || '';
+  const displayName = name || 'there';
 
-  const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#000;padding:32px 0;color:#fff"><div style="max-width:560px;margin:0 auto;background:#0b0b0b;border:1px solid #2a2a2a;border-radius:12px;padding:24px"><h1 style="margin:0 0 8px;font-size:24px;font-weight:900;letter-spacing:-0.5px">Cinema E-Booking</h1><p style="color:#d1d5db;margin:0 0 12px">Hi ${escapeHtml(name || 'there')},</p><p style="margin:0 0 16px">Good news — we've just launched a promotion.</p><p style="background:#111;padding:12px;border-radius:8px;color:#fff;font-weight:700">Code: ${code} — ${discount}% off</p><p style="margin:8px 0 16px;color:#d1d5db">Valid: ${startDate} – ${endDate}</p><a href="${process.env.APP_URL || '#'}" style="display:inline-block;background:#ba0c2f;color:#fff;text-decoration:none;padding:12px 16px;border-radius:10px;font-weight:700">Use the code on Cinema E-Booking</a><p style="color:#d1d5db;margin:16px 0 0">Enjoy the show!</p></div></div>`;
+  const periodText =
+    startDate && endDate
+      ? `This offer is valid from ${startDate} to ${endDate}.`
+      : '';
+
+  const subject = `New promotion – save ${discount}% on your next booking`;
+  const text = `Hi ${displayName},
+
+We've just launched a new promotion at Cinema E-Booking!
+
+Use promo code ${code} to save ${discount}% on eligible tickets.
+${periodText}
+
+${appUrl ? `Book now at: ${appUrl}` : ''}
+
+You are receiving this email because you subscribed to promotions. You can update your preferences in your profile.`;
+
+  const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#000;padding:24px;color:#e5e7eb">
+  <div style="max-width:600px;margin:0 auto;background:#0b0b0b;border-radius:12px;border:1px solid #2a2a2a;padding:24px">
+    <h1 style="margin:0 0 12px;font-size:24px;color:#f9fafb">New Promotion Just For You 🎬</h1>
+    <p style="margin:0 0 12px;color:#d1d5db">Hi ${escapeHtml(displayName)},</p>
+    <p style="margin:0 0 12px;color:#d1d5db">
+      We've just launched a new promotion at <strong>Cinema E-Booking</strong>!
+    </p>
+    <p style="margin:0 0 12px;color:#fbbf24">
+      <strong>Promo code:</strong>
+      <span style="font-family:monospace">${escapeHtml(code)}</span><br />
+      <strong>Discount:</strong> ${discount}% off
+    </p>
+    ${periodText
+      ? `<p style="margin:0 0 12px;color:#9ca3af">${escapeHtml(periodText)}</p>`
+      : ''
+    }
+    ${appUrl
+      ? `<p style="margin:0 0 16px">
+        <a href="${appUrl}" style="display:inline-block;padding:10px 18px;border-radius:999px;background:#ba0c2f;color:#f9fafb;font-weight:600;text-decoration:none">
+          Book now
+        </a>
+      </p>`
+      : ''
+    }
+    <p style="margin:16px 0 0;font-size:12px;color:#6b7280">
+      You are receiving this email because you subscribed to promotions.
+      You can update your preferences any time in your profile.
+    </p>
+  </div>
+</div>`;
 
   await transporter.sendMail({
     from: process.env.EMAIL_FROM!,
@@ -120,6 +166,7 @@ export async function sendPromotionEmail(opts: {
     html,
   });
 }
+
 
 function escapeHtml(s: string) {
   return s
