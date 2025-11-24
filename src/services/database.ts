@@ -367,7 +367,7 @@ export const showroomService = {
   } catch (error: any) {
     throw new Error(`getShowroomsByTheater failed: ${error.message || error}`);
   }
-}
+},
 }
   // Get all showrooms from a theater
   // Get shows from a showroom
