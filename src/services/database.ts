@@ -327,3 +327,20 @@ export const userService = {
   },
 };
 
+// Theaters
+
+  // Get all theaters
+  // Get theater showtimes based on movie: get all shows from all showrooms, filter by movie, and return startTime
+  
+  // TO BE IMPLEMENTED LATER
+  // // Create Theater
+  // Create showroom for theater
+  
+// Showrooms
+
+  // Get all showrooms from a theater
+  // Get shows from a showroom
+
+  // TO BE IMPLEMENTED LATER
+  // Create a show for a showroom
+
