@@ -1,5 +1,5 @@
 // GET - get show by id
 
-// PUT - edit show info
+// PUT - update available seats for show
 
 // DELETE - delete show

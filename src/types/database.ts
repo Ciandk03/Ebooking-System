@@ -87,6 +87,7 @@ export interface Show {
   name: string;
   availableSeats: string[];
   movie: string;
+  date: string;
   startTime: string;
   endTime: string;
   adultTicketPrice: number;

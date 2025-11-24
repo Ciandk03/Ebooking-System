@@ -1,1 +1,0 @@
-// GET - get all showrooms from a theater
