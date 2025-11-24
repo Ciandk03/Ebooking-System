@@ -1,6 +1,7 @@
 // Database model interfaces for the ebooking system
 
 export interface Movie {
+  id: string;
   title: string;
   poster: string;
   rating: number;
@@ -30,11 +31,12 @@ export interface Showtime {
 }
 
 export interface Booking {
-  id: string;
+  showId: string;
   userId: string;
-  movieId: string;
-  showtimeId: string;
   seats: string[]; // Array of seat numbers like ["A1", "A2", "B5"]
+  childTickets: number;
+  adultTickets: number;
+  seniorTickets: number;
   totalPrice: number;
   status: 'pending' | 'confirmed' | 'cancelled';
   bookingDate: Date;
@@ -70,14 +72,24 @@ export interface User {
 }
 
 export interface Theater {
-  id: string;
   name: string;
-  location: string;
-  totalSeats: number;
-  seatLayout: {
-    rows: number;
-    seatsPerRow: number;
-  };
-  createdAt: Date;
-  updatedAt: Date;
+  address: string;
+  showrooms: string[];
+}
+
+export interface Showroom {
+  name: string;
+  seats: string[];
+  shows: string[];
+}
+
+export interface Show {
+  name: string;
+  availableSeats: string[];
+  movie: string;
+  startTime: string;
+  endTime: string;
+  adultTicketPrice: number;
+  childTicketPrice: number;
+  seniorTicketPrice: number;
 }

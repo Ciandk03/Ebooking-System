@@ -17,6 +17,7 @@ export default function AddMoviePage() {
     setMessage(null);
     try {
       const body: Movie = {
+        id: "",
         title: movieForm.title,
         poster: movieForm.poster,
         rating: Number(movieForm.rating),
