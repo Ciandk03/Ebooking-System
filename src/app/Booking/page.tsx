@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo } from "react";
-import type { Theater } from '@/types/database';
-import { useSearchParams } from "next/navigation";
+import type { Showtime } from "@/types/database";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const UGA = {
   black: "#000000",
@@ -75,132 +75,232 @@ const styles = {
   muted: { color: UGA.gray },
 };
 
-const THEATERS: Theater[] = [
-  //fetch theaters via API call
-];
-
-/** Showtimes — fetch based on theater/showrooms/shows + movie */
-const SHOWTIMES = ["12:00 PM", "2:30 PM", "5:00 PM", "8:15 PM"];
+interface ShowDoc extends Showtime {
+  id: string;
+}
 
 export default function FindShowtimePage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
 
+  const movieId = searchParams.get("movieId") || "";
   const movieTitle = searchParams.get("title") || "";
 
-  const [theaterQuery, setTheaterQuery] = useState("");
-  const [selectedTheater, setSelectedTheater] = useState<Theater | null>(null);
-  const [filteredTheaters, setFilteredTheaters] = useState<Theater[]>([]);
+  const [shows, setShows] = useState<ShowDoc[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedShowId, setSelectedShowId] = useState<string>("");
 
-  const [showtime, setShowtime] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Fetch shows from /api/movies/[id]/shows
   useEffect(() => {
-    if (!theaterQuery.trim()) {
-      setFilteredTheaters([] as Theater[]);
+    if (!movieId) return;
+
+    const fetchShows = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const res = await fetch(`/api/movies/${movieId}/shows`);
+
+const text = await res.text(); // read raw body once
+let json: any;
+try {
+  json = text ? JSON.parse(text) : null;
+} catch (parseErr) {
+  console.error("Booking: non-JSON response from /shows:", text);
+  throw new Error("Invalid response from showtimes API");
+}
+
+if (!res.ok || !json?.success) {
+  throw new Error(json?.error || "Failed to load showtimes");
+}
+
+setShows(json.data || []);
+
+      } catch (err: any) {
+        console.error("Booking: error loading showtimes", err);
+        setError(err?.message || "Failed to load showtimes");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchShows();
+  }, [movieId]);
+
+  // Unique list of dates from shows
+  const dateOptions = useMemo(() => {
+    const unique = Array.from(new Set(shows.map((s) => s.date)));
+    unique.sort();
+    return unique;
+  }, [shows]);
+
+  // When we first get dates, default to the first one
+  useEffect(() => {
+    if (!selectedDate && dateOptions.length > 0) {
+      setSelectedDate(dateOptions[0]);
+    }
+  }, [dateOptions, selectedDate]);
+
+  // Shows for currently selected date
+  const showsForSelectedDate = useMemo(
+    () => (selectedDate ? shows.filter((s) => s.date === selectedDate) : []),
+    [shows, selectedDate]
+  );
+
+  // Keep selectedShowId in sync when date or shows change
+  useEffect(() => {
+    if (!selectedDate) {
+      setSelectedShowId("");
       return;
     }
 
-    const q = theaterQuery.toLowerCase();
-    setFilteredTheaters(
-      THEATERS.filter(
-        (t) => t.name.toLowerCase().includes(q) || t.address.toLowerCase().includes(q)
-      )
-    );
-  }, [theaterQuery]);
+    if (showsForSelectedDate.length === 0) {
+      setSelectedShowId("");
+      return;
+    }
+
+    if (!selectedShowId || !showsForSelectedDate.some((s) => s.id === selectedShowId)) {
+      setSelectedShowId(showsForSelectedDate[0].id);
+    }
+  }, [selectedDate, showsForSelectedDate, selectedShowId]);
+
+  const selectedShow = useMemo(
+    () => shows.find((s) => s.id === selectedShowId) || null,
+    [shows, selectedShowId]
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedTheater || !showtime) {
-      alert("Select a theater and showtime.");
+
+    if (!movieId) {
+      alert("Missing movie information.");
       return;
     }
-    alert("Showtime selected! (Demo)");
+
+    if (!selectedDate || !selectedShowId || !selectedShow) {
+      alert("Select a date and showtime.");
+      return;
+    }
+
+    // Go to uncreated seat selection page
+    router.push(
+      `/SeatSelection?showId=${encodeURIComponent(
+        selectedShowId
+      )}&movieId=${encodeURIComponent(movieId)}&title=${encodeURIComponent(
+        movieTitle
+      )}`
+    );
   };
 
   return (
     <div style={styles.page}>
       <div style={styles.container}>
         <header style={styles.header}>
-          <h1 style={styles.title}>🎥 Find a Showing</h1>
+          <h1 style={styles.title}>🎥 Choose a Showtime</h1>
           <div style={{ fontWeight: 800, color: UGA.gray }}>{movieTitle}</div>
         </header>
 
-        <form style={styles.body} onSubmit={handleSubmit}>
-          {/* THEATER AUTOCOMPLETE */}
-          <div>
-            <div style={styles.label}>Search for a Theater</div>
-            <input
-              type="text"
-              placeholder="Start typing a name or address..."
-              style={styles.input}
-              value={theaterQuery}
-              onChange={(e) => {
-                setTheaterQuery(e.target.value);
-                setSelectedTheater(null);
-              }}
-            />
+        <form onSubmit={handleSubmit}>
+          <div style={styles.body}>
+            {/* MOVIE TITLE (READ-ONLY) */}
+            <div>
+              <div style={styles.label}>Movie</div>
+              <input type="text" style={styles.input} value={movieTitle} readOnly />
+            </div>
 
-            {filteredTheaters.length > 0 && !selectedTheater && (
-              <div style={{ marginTop: 8, background: UGA.dark, borderRadius: 8 }}>
-                {filteredTheaters.map((t) => (
-                  <div
-                    key={t.name}
-                    onClick={() => {
-                      setSelectedTheater(t);
-                      setTheaterQuery(`${t.name} (${t.address})`);
-                      setFilteredTheaters([]);
-                    }}
-                    style={{ padding: 10, cursor: "pointer", borderBottom: `1px solid ${UGA.border}` }}
-                  >
-                    <strong>{t.name}</strong>
-                    <div style={{ fontSize: 12, color: UGA.gray }}>{t.address}</div>
-                  </div>
-                ))}
+            {/* ERROR / LOADING STATE */}
+            {loading && (
+              <div style={{ ...styles.muted, fontSize: 13 }}>
+                Loading showtimes for this movie…
               </div>
             )}
-          </div>
+            {error && (
+              <div
+                style={{
+                  marginTop: 4,
+                  padding: 10,
+                  borderRadius: 8,
+                  background: "#4b1a1a",
+                  color: "#ffe2e2",
+                  fontSize: 13,
+                }}
+              >
+                {error}
+              </div>
+            )}
+            {!loading && !error && shows.length === 0 && (
+              <div style={{ ...styles.muted, fontSize: 13 }}>
+                There are currently no scheduled showtimes for this movie.
+              </div>
+            )}
 
-          {/* MOVIE TITLE (READ-ONLY) */}
-          <div>
-            <div style={styles.label}>Movie Title</div>
-            <input type="text" style={styles.input} value={movieTitle} readOnly />
-          </div>
+            {/* DATE DROPDOWN */}
+            {shows.length > 0 && (
+              <>
+                <div>
+                  <div style={styles.label}>Select Date</div>
+                  <select
+                    style={styles.input}
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                  >
+                    {dateOptions.length === 0 && (
+                      <option value="">No dates available</option>
+                    )}
+                    {dateOptions.map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-          {/* SHOWTIME DROPDOWN */}
-          <div>
-            <div style={styles.label}>Select Showtime</div>
-            <select
-              style={styles.input}
-              value={showtime}
-              onChange={(e) => setShowtime(e.target.value)}
-            >
-              <option value="">Choose a time...</option>
-              {SHOWTIMES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </div>
+                {/* SHOWTIME DROPDOWN */}
+                <div>
+                  <div style={styles.label}>Select Showtime</div>
+                  <select
+                    style={styles.input}
+                    value={selectedShowId}
+                    onChange={(e) => setSelectedShowId(e.target.value)}
+                    disabled={showsForSelectedDate.length === 0}
+                  >
+                    <option value="">Choose a time...</option>
+                    {showsForSelectedDate.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.startTime} – {s.endTime}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
 
-          <button type="submit" style={styles.submit}>
-            Continue
-          </button>
+            <button type="submit" style={styles.submit} disabled={shows.length === 0}>
+              Continue
+            </button>
 
-          {/* SUMMARY */}
-          <div style={styles.summary}>
-            <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 6 }}>
-              📋 Selection Summary
-            </div>
-            <div style={styles.muted}>
-              <p>
-                <strong>Theater:</strong> {selectedTheater ? selectedTheater.name : "Not selected"}
-              </p>
-              <p>
-                <strong>Movie:</strong> {movieTitle}
-              </p>
-              <p>
-                <strong>Showtime:</strong> {showtime || "Not selected"}
-              </p>
+            {/* SUMMARY */}
+            <div style={styles.summary}>
+              <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 6 }}>
+                📋 Selection Summary
+              </div>
+              <div style={styles.muted}>
+                <p>
+                  <strong>Movie:</strong> {movieTitle}
+                </p>
+                <p>
+                  <strong>Date:</strong> {selectedDate || "Not selected"}
+                </p>
+                <p>
+                  <strong>Showtime:</strong>{" "}
+                  {selectedShow
+                    ? `${selectedShow.startTime} – ${selectedShow.endTime}`
+                    : "Not selected"}
+                </p>
+              </div>
             </div>
           </div>
         </form>

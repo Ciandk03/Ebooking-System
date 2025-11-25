@@ -1,6 +1,5 @@
 import { db } from '../../lib/firebase';
 import { Movie, Showtime, Booking, User } from '../types/database';
-import { Movie, Showtime, Booking, User } from '../types/database';
 
 // Firebase Firestore
 import * as firestore from 'firebase/firestore';
@@ -103,7 +102,7 @@ export const showtimeService = {
   async getAllShowtimes(): Promise<Showtime[]> {
     console.log('Fetching all showtimes...');
     try {
-      const snapshot = await firestore.getDocs(showtimesCollection);
+      const snapshot = await firestore.getDocs(showsCollection);
       return snapshot.docs.map(mapDoc<Showtime>);
     } catch (error) {
       throw new Error(`getAllShowtimes failed: ${error}`);
@@ -113,7 +112,7 @@ export const showtimeService = {
   async getShowtimesByMovieId(movieId: string): Promise<Showtime[]> {
     console.log(`Fetching showtimes for movie ID: ${movieId}`);
     try {
-      const q = firestore.query(showtimesCollection, firestore.where('movieId', '==', movieId));
+      const q = firestore.query(showsCollection, firestore.where('movie', '==', movieId));
       const snapshot = await firestore.getDocs(q);
       return snapshot.docs.map(mapDoc<Showtime>);
     } catch (error) {
@@ -159,6 +158,38 @@ export const showtimeService = {
     }
   },
 };
+
+export const showService = {
+  async getShowsByMovieId(movieId: string): Promise<Showtime[]> {
+    console.log(`Fetching shows for movieId=${movieId} from 'shows' collection...`);
+    try {
+      const q = firestore.query(
+        showsCollection,
+        firestore.where('movie', '==', movieId)
+      );
+      const snapshot = await firestore.getDocs(q);
+
+      // Use mapDoc so each show also gets `id`, createdAt, updatedAt fields
+      const shows = snapshot.docs.map(mapDoc<Showtime>);
+
+      // Sort by date then startTime for nicer display
+      shows.sort((a: any, b: any) => {
+        const dateCmp = (a.date || '').localeCompare(b.date || '');
+        if (dateCmp !== 0) return dateCmp;
+        return (a.startTime || '').localeCompare(b.startTime || '');
+      });
+
+      return shows;
+    } catch (error: any) {
+      console.error('getShowsByMovieId failed:', error);
+      throw new Error(`getShowsByMovieId failed: ${error.message || error}`);
+    }
+  },
+};
+
+
+
+
 
 // Bookings
 export const bookingsCollection = firestore.collection(db, 'bookings');
