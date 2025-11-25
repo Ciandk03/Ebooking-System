@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as firestore from 'firebase/firestore';
-import { showroomsCollection } from '../../../services/database';
+import { showtimesCollection } from '../../../services/database';
 
 // Optional, but can help with caching behavior
 export const runtime = 'nodejs';
@@ -8,9 +8,10 @@ export const runtime = 'nodejs';
 
 export async function GET(_request: NextRequest) {
   console.log('API: GET /api/showrooms - Fetching all showrooms');
+  
 
   try {
-    const snapshot = await firestore.getDocs(showroomsCollection);
+    const snapshot = await firestore.getDocs(showtimesCollection);
     const showrooms = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),

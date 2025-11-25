@@ -94,7 +94,7 @@ export const movieService = {
 };
 
 // Showtimes
-export const showtimesCollection = firestore.collection(db, 'showtimes');
+export const showtimesCollection = firestore.collection(db, 'showrooms');
 export const showsCollection = firestore.collection(db, 'shows');
 
 
