@@ -4,6 +4,63 @@ import * as firestore from 'firebase/firestore';
 import { db } from '../../../../../lib/firebase';
 import { userService, movieService } from '../../../../services/database';
 
+// Convert "HH:MM" to minutes since midnight
+function timeStringToMinutes(time: string): number {
+  const [hh, mm] = time.split(':').map(Number);
+  return hh * 60 + mm;
+}
+
+// Check if two time intervals [startA, endA] and [startB, endB] overlap
+// Note: end-to-start touching is allowed; only true overlap is blocked.
+function intervalsOverlap(
+  startA: string,
+  endA: string,
+  startB: string,
+  endB: string,
+): boolean {
+  const aStart = timeStringToMinutes(startA);
+  const aEnd = timeStringToMinutes(endA);
+  const bStart = timeStringToMinutes(startB);
+  const bEnd = timeStringToMinutes(endB);
+
+  // Overlap iff each interval starts before the other one ends
+  return aStart < bEnd && bStart < aEnd;
+}
+
+// Query Firestore for any conflicting show in the same showroom & date
+async function hasShowtimeConflict(
+  showroomId: string,
+  dateStr: string,       // "YYYY-MM-DD"
+  startTimeStr: string,  // "HH:MM"
+  endTimeStr: string,    // "HH:MM"
+): Promise<boolean> {
+  // If you renamed to showtimesCollection, swap this to that.
+  const q = firestore.query(
+    showsCollection,
+    firestore.where('showroom', '==', showroomId),
+    firestore.where('date', '==', dateStr),
+  );
+
+  const snapshot = await firestore.getDocs(q);
+
+  for (const doc of snapshot.docs) {
+    const data = doc.data() as any;
+    const existingStart = data.startTime as string;
+    const existingEnd = data.endTime as string;
+
+    if (!existingStart || !existingEnd) continue;
+
+    if (intervalsOverlap(startTimeStr, endTimeStr, existingStart, existingEnd)) {
+      console.log(
+        `Conflict detected with existing show ${doc.id}: ${existingStart}-${existingEnd} in showroom ${showroomId} on ${dateStr}`,
+      );
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export const runtime = 'nodejs';
 
 // Firestore collection for shows (showtimes)
@@ -171,6 +228,25 @@ export async function POST(request: NextRequest) {
     const dateStr = start.toISOString().slice(0, 10); // YYYY-MM-DD
     const startTimeStr = start.toTimeString().slice(0, 5); // HH:MM
     const endTimeStr = end.toTimeString().slice(0, 5); // HH:MM
+
+    // 5b) Prevent time conflicts in the same showroom
+    const conflict = await hasShowtimeConflict(
+      showroomId,
+      dateStr,
+      startTimeStr,
+      endTimeStr,
+    );
+
+    if (conflict) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'Time conflict: another showtime already exists in this showroom during that period.',
+        },
+        { status: 409 },
+      );
+    }
 
     // 6) Build showtime document in `shows`
     const name = `${movie.title} - ${dateStr} ${startTimeStr}`;
