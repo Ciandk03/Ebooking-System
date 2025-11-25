@@ -1,5 +1,6 @@
 import { db } from '../../lib/firebase';
 import { Movie, Showtime, Booking, User } from '../types/database';
+import { Movie, Showtime, Booking, User } from '../types/database';
 
 // Firebase Firestore
 import * as firestore from 'firebase/firestore';
