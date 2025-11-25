@@ -22,10 +22,12 @@ export interface Showtime {
   movieId: string;
   date: string; // YYYY-MM-DD format
   time: string; // HH:MM format
-  theater: string;
+  showroom: string;
   availableSeats: number;
   totalSeats: number;
-  price: number;
+  childTicketPrice: number;
+  adultTicketPrice: number;
+  seniorTicketPrice: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -70,6 +72,7 @@ export interface User {
   verificationExpires?: Date | null;
   verifiedAt?: Date | null;
 }
+<<<<<<< HEAD
 
 export interface Theater {
   name: string;
@@ -87,6 +90,7 @@ export interface Show {
   name: string;
   availableSeats: string[];
   movie: string;
+  showroom: string;
   date: string;
   startTime: string;
   endTime: string;
@@ -94,3 +98,5 @@ export interface Show {
   childTicketPrice: number;
   seniorTicketPrice: number;
 }
+=======
+>>>>>>> 9076b04f65b799b86069a3090e7574464fbf53c7
