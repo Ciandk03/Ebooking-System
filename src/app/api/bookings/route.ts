@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import * as firestore from 'firebase/firestore';
+import { db } from '../../../../lib/firebase';
 import { bookingService } from '../../../services/database';
+
 
 // GET /api/bookings - Get all bookings or filter by userId
 export async function GET(request: NextRequest) {
   console.log('API: GET /api/bookings - Fetching bookings');
-  
+
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
-    
+
     let bookings;
     if (userId) {
       console.log(`API: Fetching bookings for user ID: ${userId}`);
@@ -17,7 +20,7 @@ export async function GET(request: NextRequest) {
       console.log('API: Fetching all bookings');
       bookings = await bookingService.getAllBookings();
     }
-    
+
     console.log(`API: Successfully returned ${bookings.length} bookings`);
     return NextResponse.json({
       success: true,
@@ -40,15 +43,15 @@ export async function GET(request: NextRequest) {
 // POST /api/bookings - Create a new booking
 export async function POST(request: NextRequest) {
   console.log('API: POST /api/bookings - Creating new booking');
-  
+
   try {
     const body = await request.json();
     console.log('API: Booking data received:', JSON.stringify(body, null, 2));
-    
+
     // Validate required fields
     const requiredFields = ['userId', 'movieId', 'showtimeId', 'seats', 'totalPrice'];
     const missingFields = requiredFields.filter(field => !body[field]);
-    
+
     if (missingFields.length > 0) {
       console.log(`API: Missing required fields: ${missingFields.join(', ')}`);
       return NextResponse.json(
@@ -60,24 +63,51 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+    const seatsArray: string[] = Array.isArray(body.seats) ? body.seats : [];
+
     const bookingId = await bookingService.createBooking({
       userId: body.userId,
       movieId: body.movieId,
       showtimeId: body.showtimeId,
-      seats: body.seats,
+      seats: seatsArray,
       totalPrice: body.totalPrice,
       status: body.status || 'pending',
-      bookingDate: new Date(body.bookingDate || new Date())
+      bookingDate: new Date(body.bookingDate || new Date()),
     });
-    
+
     console.log(`API: Booking created successfully with ID: ${bookingId}`);
-    return NextResponse.json({
-      success: true,
-      data: { id: bookingId },
-      message: 'Booking created successfully'
-    }, { status: 201 });
-    
+
+    try {
+      if (seatsArray.length > 0) {
+        const showRef = firestore.doc(db, 'shows', body.showtimeId);
+        await firestore.updateDoc(showRef, {
+          availableSeats: firestore.arrayRemove(...seatsArray),
+          updatedAt: firestore.Timestamp.fromDate(new Date()),
+        });
+        console.log(
+          `API: Updated show ${body.showtimeId} availableSeats (reserved seats: ${seatsArray.join(
+            ', ',
+          )})`,
+        );
+      }
+    } catch (err) {
+      // Booking is created, but we failed to update the show document.
+      // Log a warning but still return success so the user isn't blocked.
+      console.error(
+        'API: Warning – booking created but failed to update show.availableSeats',
+        err,
+      );
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: { id: bookingId },
+        message: 'Booking created successfully',
+      },
+      { status: 201 },
+    );
+
   } catch (error) {
     console.error('API: Error creating booking:', error);
     return NextResponse.json(

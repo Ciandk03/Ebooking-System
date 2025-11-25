@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -106,7 +106,8 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "center",
     justifyContent: "center",
     cursor: "pointer",
-    transition: "transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, background 0.12s ease",
+    transition:
+      "transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, background 0.12s ease",
     background: "#101318",
   },
   seatSelected: {
@@ -272,9 +273,7 @@ function groupSeatsByRow(seats: string[]) {
   });
 
   // sort rows alphabetically; seats inside row numerically if possible
-  const rows = Array.from(map.entries()).sort(([a], [b]) =>
-    a.localeCompare(b)
-  );
+  const rows = Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
 
   return rows.map(([rowLabel, rowSeats]) => {
     const sortedSeats = [...rowSeats].sort((a, b) => {
@@ -305,6 +304,8 @@ export default function SeatSelectionPage() {
   const [info, setInfo] = useState<string | null>(null);
 
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const [allSeats, setAllSeats] = useState<string[]>([]);
+  const [showroomName, setShowroomName] = useState<string | null>(null);
 
   const [adultCount, setAdultCount] = useState(1);
   const [childCount, setChildCount] = useState(0);
@@ -363,8 +364,52 @@ export default function SeatSelectionPage() {
     load();
   }, [movieId, showId]);
 
+  useEffect(() => {
+    const fetchShowroomSeats = async () => {
+      if (!show?.showroom) return;
+
+      try {
+        const res = await fetch("/api/showrooms");
+        const json = await res.json();
+
+        if (!res.ok || !json?.success) {
+          throw new Error(json?.error || "Failed to load showrooms");
+        }
+
+        const showrooms: any[] = json.showrooms || [];
+        const showroom = showrooms.find((sr) => sr.id === show.showroom);
+
+        if (showroom) {
+          const seats: string[] = Array.isArray(showroom.seats)
+            ? showroom.seats
+            : [];
+          setAllSeats(seats);
+          setShowroomName(showroom.name || showroom.id);
+        } else {
+          // 🔁 Fallback – still show something, but this *will* collapse seats if used
+          setAllSeats(show.availableSeats || []);
+          setShowroomName(show.showroom);
+        }
+      } catch (err) {
+        console.error("SeatSelection: failed to load showroom seats", err);
+        // Fallback to avoid blank screen
+        setAllSeats(show?.availableSeats || []);
+        setShowroomName(show?.showroom || "");
+      }
+    };
+
+    if (show) {
+      fetchShowroomSeats();
+    }
+  }, [show]);
+
   const groupedSeats = useMemo(
-    () => (show ? groupSeatsByRow(show.availableSeats || []) : []),
+    () => (allSeats.length > 0 ? groupSeatsByRow(allSeats) : []),
+    [allSeats]
+  );
+
+  const availableSeatSet = useMemo(
+    () => new Set(show?.availableSeats || []),
     [show]
   );
 
@@ -469,7 +514,9 @@ export default function SeatSelectionPage() {
       const json: BookingResponse = await res.json();
 
       if (!res.ok || !json.success) {
-        throw new Error(json.error || json.message || "Failed to create booking");
+        throw new Error(
+          json.error || json.message || "Failed to create booking"
+        );
       }
 
       setInfo("Booking confirmed! Redirecting to your dashboard…");
@@ -498,7 +545,9 @@ export default function SeatSelectionPage() {
         <header style={styles.header}>
           <h1 style={styles.title}>🍿 Select Your Seats</h1>
           <div style={styles.subtitle}>
-            {movieTitle && <span style={{ fontWeight: 600 }}>{movieTitle}</span>}
+            {movieTitle && (
+              <span style={{ fontWeight: 600 }}>{movieTitle}</span>
+            )}
             {show && (
               <>
                 {" "}
@@ -514,7 +563,8 @@ export default function SeatSelectionPage() {
             <div style={styles.cardTitleRow}>
               <div style={styles.cardTitle}>Seat Map</div>
               <div style={styles.pill}>
-                Showroom: <strong>{show?.showroom ?? "TBA"}</strong>
+                Showroom:{" "}
+                <strong>{showroomName ?? show?.showroom ?? "TBA"}</strong>
               </div>
             </div>
 
@@ -538,18 +588,27 @@ export default function SeatSelectionPage() {
                     <div key={rowLabel} style={styles.seatRow}>
                       <div style={styles.rowLabel}>{rowLabel}</div>
                       {seats.map((seat) => {
+                        const isAvailable = availableSeatSet.has(seat);
                         const isSelected = selectedSeats.includes(seat);
-                        const baseStyle = {
-                          ...styles.seat,
-                          ...(isSelected ? styles.seatSelected : {}),
-                        };
+                        const isReserved = !isAvailable; // in layout but not in availableSeats
+
+                        let seatStyle: React.CSSProperties = { ...styles.seat };
+
+                        if (isReserved) {
+                          seatStyle = { ...seatStyle, ...styles.seatTaken }; // grey / disabled
+                        } else if (isSelected) {
+                          seatStyle = { ...seatStyle, ...styles.seatSelected }; // red
+                        }
 
                         return (
                           <button
                             key={seat}
                             type="button"
-                            onClick={() => handleSeatToggle(seat)}
-                            style={baseStyle}
+                            disabled={isReserved}
+                            onClick={() => {
+                              if (!isReserved) handleSeatToggle(seat);
+                            }}
+                            style={seatStyle}
                           >
                             {seat.replace(/^[A-Za-z]+/, "")}
                           </button>
@@ -618,7 +677,9 @@ export default function SeatSelectionPage() {
                         min={0}
                         value={adultCount}
                         onChange={(e) =>
-                          setAdultCount(Math.max(0, Number(e.target.value) || 0))
+                          setAdultCount(
+                            Math.max(0, Number(e.target.value) || 0)
+                          )
                         }
                         style={styles.numberInput}
                       />
@@ -630,7 +691,9 @@ export default function SeatSelectionPage() {
                         min={0}
                         value={childCount}
                         onChange={(e) =>
-                          setChildCount(Math.max(0, Number(e.target.value) || 0))
+                          setChildCount(
+                            Math.max(0, Number(e.target.value) || 0)
+                          )
                         }
                         style={styles.numberInput}
                       />
@@ -642,15 +705,17 @@ export default function SeatSelectionPage() {
                         min={0}
                         value={seniorCount}
                         onChange={(e) =>
-                          setSeniorCount(Math.max(0, Number(e.target.value) || 0))
+                          setSeniorCount(
+                            Math.max(0, Number(e.target.value) || 0)
+                          )
                         }
                         style={styles.numberInput}
                       />
                     </div>
                   </div>
                   <div style={{ ...styles.muted, marginTop: 4 }}>
-                    Total tickets: <strong>{totalTickets}</strong> • Selected seats:{" "}
-                    <strong>{totalSelectedSeats}</strong>
+                    Total tickets: <strong>{totalTickets}</strong> • Selected
+                    seats: <strong>{totalSelectedSeats}</strong>
                   </div>
                 </div>
 
@@ -698,7 +763,9 @@ export default function SeatSelectionPage() {
                   </div>
                 </div>
 
-                {info && <div style={{ ...styles.muted, marginTop: 4 }}>{info}</div>}
+                {info && (
+                  <div style={{ ...styles.muted, marginTop: 4 }}>{info}</div>
+                )}
                 {error && <div style={styles.error}>{error}</div>}
               </>
             )}
@@ -726,7 +793,9 @@ export default function SeatSelectionPage() {
             </div>
 
             {!canConfirm && disabledText && (
-              <div style={{ ...styles.muted, marginTop: 6 }}>{disabledText}</div>
+              <div style={{ ...styles.muted, marginTop: 6 }}>
+                {disabledText}
+              </div>
             )}
           </section>
         </div>

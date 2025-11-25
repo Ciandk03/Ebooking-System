@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect, useMemo } from "react";
 import type { Showtime } from "@/types/database";
@@ -16,6 +16,21 @@ const UGA = {
 };
 
 const styles = {
+  backButton: {
+    padding: "8px 14px",
+    background: "transparent",
+    border: `1px solid ${UGA.red}`,
+    borderRadius: 8,
+    color: UGA.red,
+    cursor: "pointer",
+    fontSize: 13,
+    fontWeight: 700,
+    transition: "0.2s ease",
+  },
+  backButtonHover: {
+    background: UGA.red,
+    color: UGA.white,
+  },
   page: {
     background: UGA.black,
     minHeight: "100vh",
@@ -104,21 +119,20 @@ export default function FindShowtimePage() {
 
         const res = await fetch(`/api/movies/${movieId}/shows`);
 
-const text = await res.text(); // read raw body once
-let json: any;
-try {
-  json = text ? JSON.parse(text) : null;
-} catch (parseErr) {
-  console.error("Booking: non-JSON response from /shows:", text);
-  throw new Error("Invalid response from showtimes API");
-}
+        const text = await res.text(); // read raw body once
+        let json: any;
+        try {
+          json = text ? JSON.parse(text) : null;
+        } catch (parseErr) {
+          console.error("Booking: non-JSON response from /shows:", text);
+          throw new Error("Invalid response from showtimes API");
+        }
 
-if (!res.ok || !json?.success) {
-  throw new Error(json?.error || "Failed to load showtimes");
-}
+        if (!res.ok || !json?.success) {
+          throw new Error(json?.error || "Failed to load showtimes");
+        }
 
-setShows(json.data || []);
-
+        setShows(json.data || []);
       } catch (err: any) {
         console.error("Booking: error loading showtimes", err);
         setError(err?.message || "Failed to load showtimes");
@@ -162,7 +176,10 @@ setShows(json.data || []);
       return;
     }
 
-    if (!selectedShowId || !showsForSelectedDate.some((s) => s.id === selectedShowId)) {
+    if (
+      !selectedShowId ||
+      !showsForSelectedDate.some((s) => s.id === selectedShowId)
+    ) {
       setSelectedShowId(showsForSelectedDate[0].id);
     }
   }, [selectedDate, showsForSelectedDate, selectedShowId]);
@@ -200,7 +217,26 @@ setShows(json.data || []);
       <div style={styles.container}>
         <header style={styles.header}>
           <h1 style={styles.title}>🎥 Choose a Showtime</h1>
-          <div style={{ fontWeight: 800, color: UGA.gray }}>{movieTitle}</div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button
+              type="button"
+              onClick={() => router.back()}
+              style={styles.backButton}
+              onMouseEnter={(e) => (
+                (e.currentTarget.style.background = UGA.red),
+                (e.currentTarget.style.color = UGA.white)
+              )}
+              onMouseLeave={(e) => (
+                (e.currentTarget.style.background = "transparent"),
+                (e.currentTarget.style.color = UGA.red)
+              )}
+            >
+              ⬅ Back
+            </button>
+
+            <div style={{ fontWeight: 800, color: UGA.gray }}>{movieTitle}</div>
+          </div>
         </header>
 
         <form onSubmit={handleSubmit}>
@@ -208,7 +244,12 @@ setShows(json.data || []);
             {/* MOVIE TITLE (READ-ONLY) */}
             <div>
               <div style={styles.label}>Movie</div>
-              <input type="text" style={styles.input} value={movieTitle} readOnly />
+              <input
+                type="text"
+                style={styles.input}
+                value={movieTitle}
+                readOnly
+              />
             </div>
 
             {/* ERROR / LOADING STATE */}
@@ -278,7 +319,11 @@ setShows(json.data || []);
               </>
             )}
 
-            <button type="submit" style={styles.submit} disabled={shows.length === 0}>
+            <button
+              type="submit"
+              style={styles.submit}
+              disabled={shows.length === 0}
+            >
               Continue
             </button>
 
