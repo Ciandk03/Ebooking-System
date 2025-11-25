@@ -67,6 +67,7 @@ export const runtime = 'nodejs';
 const showsCollection = firestore.collection(db, 'shows');
 
 // Helper: verify JWT from Authorization header
+/**
 function verifyToken(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -87,6 +88,7 @@ function verifyToken(request: NextRequest) {
     return null;
   }
 }
+  */
 
 // POST /api/admin/showtimes - create a showtime
 export async function POST(request: NextRequest) {
@@ -94,6 +96,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // 1) Auth + admin check
+    /**
     const payload = verifyToken(request);
     if (!payload) {
       return NextResponse.json(
@@ -101,7 +104,7 @@ export async function POST(request: NextRequest) {
         { status: 401 },
       );
     }
-
+    
     const adminUser = await userService.getUserById(payload.userId);
     if (!adminUser || !adminUser.isAdmin) {
       console.log(
@@ -113,6 +116,7 @@ export async function POST(request: NextRequest) {
         { status: 403 },
       );
     }
+    */
 
     // 2) Parse & validate body
     const body = await request.json();

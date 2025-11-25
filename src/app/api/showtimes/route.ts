@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     console.log('API: Showtime data received:', JSON.stringify(body, null, 2));
     
     // Validate required fields
-    const requiredFields = ['movieId', 'date', 'time', 'theater', 'availableSeats', 'totalSeats', 'price'];
+    const requiredFields = ['movieId', 'date', 'time', 'showroom', 'availableSeats', 'totalSeats', 'price'];
     const missingFields = requiredFields.filter(field => !body[field] && body[field] !== 0);
     
     if (missingFields.length > 0) {
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       movieId: body.movieId,
       date: body.date,
       time: body.time,
-      theater: body.theater,
+      showroom: body.theater,
       availableSeats: body.availableSeats,
       totalSeats: body.totalSeats,
       price: body.price
