@@ -519,46 +519,6 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({
           </div>
         </div>
       )}
-
-      {/* Dates + Showtimes sections */}
-      <div style={styles.showtimesSection}>
-        <h3 style={styles.showtimesTitle}>Dates</h3>
-        <div style={styles.pillsRow}>
-          {dateOptions.map((iso) => {
-            const active = selectedDate === iso;
-            return (
-              <button
-                key={iso}
-                type="button"
-                style={{ ...styles.pill, ...(active ? styles.pillActive : {}) }}
-                onClick={() => setSelectedDate(iso)}
-                aria-label={`Select date ${labelForISO(iso)}`}
-              >
-                {labelForISO(iso)}
-              </button>
-            );
-          })}
-        </div>
-
-        <h3 style={styles.showtimesTitle}>Showtimes</h3>
-        <div style={styles.showtimesGrid}>
-          {SHOWTIMES.map((showtime) => (
-            <button
-              key={showtime}
-              style={{
-                ...styles.showtimeBtn,
-                ...(hoveredShowtime === showtime ? styles.showtimeBtnHover : {})
-              }}
-              onClick={() => handleBookShowtime(showtime)}
-              onMouseEnter={() => setHoveredShowtime(showtime)}
-              onMouseLeave={() => setHoveredShowtime(null)}
-              aria-label={`Book ${showtime} on ${selectedDate ? labelForISO(selectedDate) : 'selected date'}`}
-            >
-              {showtime}
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 };
