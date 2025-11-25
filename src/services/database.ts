@@ -95,6 +95,8 @@ export const movieService = {
 
 // Showtimes
 export const showtimesCollection = firestore.collection(db, 'showtimes');
+export const showsCollection = firestore.collection(db, 'shows');
+
 
 export const showtimeService = {
   async getAllShowtimes(): Promise<Showtime[]> {
