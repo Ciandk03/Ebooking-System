@@ -480,7 +480,6 @@ export default function SeatSelectionPage() {
     }
 
     if (!userId) {
-      alert("Please log in to complete your booking.");
       router.push("/Login");
       return;
     }
