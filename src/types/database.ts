@@ -21,10 +21,10 @@ export interface Showtime {
   id: string;
   movieId: string;
   date: string; // YYYY-MM-DD format
-  time: string; // HH:MM format
+  startTime: string; // HH:MM format
+  endTime: string;
   showroom: string;
-  availableSeats: number;
-  totalSeats: number;
+  availableSeats: string[];
   childTicketPrice: number;
   adultTicketPrice: number;
   seniorTicketPrice: number;
@@ -33,8 +33,9 @@ export interface Showtime {
 }
 
 export interface Booking {
-  showId: string;
+  showtimeId: string;
   userId: string;
+  movieId: string;
   seats: string[]; // Array of seat numbers like ["A1", "A2", "B5"]
   childTickets: number;
   adultTickets: number;
@@ -71,29 +72,4 @@ export interface User {
   verificationToken?: string | null;
   verificationExpires?: Date | null;
   verifiedAt?: Date | null;
-}
-
-export interface Theater {
-  name: string;
-  address: string;
-  showrooms: string[];
-}
-
-export interface Showroom {
-  name: string;
-  seats: string[];
-  shows: string[];
-}
-
-export interface Show {
-  name: string;
-  availableSeats: string[];
-  movie: string;
-  showroom: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  adultTicketPrice: number;
-  childTicketPrice: number;
-  seniorTicketPrice: number;
 }

@@ -1,7 +1,9 @@
-'use client';
+// Updated DashboardPage with RecentBookings component
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import RecentBookings from "../../components/RecentBookings";
 
 const UGA = {
   black: "#000000",
@@ -47,17 +49,20 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
     fontWeight: 600,
     fontSize: 14,
+    minWidth: 0,
   },
   content: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+    gridTemplateColumns: "3fr 1fr", // ⭐ 75% / 25% layout
     gap: 24,
+    minWidth: 0,
   },
   card: {
     background: UGA.nearBlack,
     padding: 24,
     borderRadius: 12,
     border: `1px solid ${UGA.border}`,
+    minWidth: 189,
   },
   cardTitle: {
     fontSize: 20,
@@ -104,14 +109,13 @@ export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const isAdminUser = Boolean(user?.isAdmin || user?.role === 'admin');
+  const isAdminUser = Boolean(user?.isAdmin || user?.role === "admin");
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    const userData = localStorage.getItem('user');
-    
+    const token = localStorage.getItem("authToken");
+    const userData = localStorage.getItem("user");
     if (!token || !userData) {
-      router.push('/Login');
+      router.push("/Login");
       return;
     }
 
@@ -119,8 +123,8 @@ export default function DashboardPage() {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
     } catch (error) {
-      console.error('Error parsing user data:', error);
-      router.push('/Login');
+      console.error("Error parsing user data:", error);
+      router.push("/Login");
     } finally {
       setLoading(false);
     }
@@ -128,18 +132,18 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
+      await fetch("/api/auth/logout", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-      router.push('/Login');
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
+      router.push("/Login");
     }
   };
 
@@ -166,12 +170,11 @@ export default function DashboardPage() {
   return (
     <div style={styles.page}>
       <div style={styles.container}>
+
+        {/* HEADER */}
         <div style={styles.header}>
-          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-            <button 
-              style={styles.backButton} 
-              onClick={() => router.push('/')}
-            >
+          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+            <button style={styles.backButton} onClick={() => router.push("/")}>
               ← Home
             </button>
             <h1 style={styles.title}>Account</h1>
@@ -181,9 +184,13 @@ export default function DashboardPage() {
           </button>
         </div>
 
+        {/* ⭐ GRID LAYOUT */}
         <div style={styles.content}>
+
+          {/* LEFT: ACCOUNT INFO (3fr) */}
           <div style={styles.card}>
             <h2 style={styles.cardTitle}>Account Information</h2>
+
             <div style={styles.userInfo}>
               <div style={styles.infoItem}>
                 <span style={styles.infoLabel}>Name:</span>
@@ -195,7 +202,7 @@ export default function DashboardPage() {
               </div>
               <div style={styles.infoItem}>
                 <span style={styles.infoLabel}>Role:</span>
-                <span style={styles.infoValue}>{user.role || 'User'}</span>
+                <span style={styles.infoValue}>{user.role || "User"}</span>
               </div>
               {user.phone && (
                 <div style={styles.infoItem}>
@@ -212,41 +219,42 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div style={styles.card}>
-            <h2 style={styles.cardTitle}>Recent Bookings</h2>
-            <div style={styles.cardContent}>
-              <p>No recent bookings found.</p>
-              <p style={{ marginTop: 16, fontSize: 14, color: UGA.gray }}>
-                Start booking your favorite movies!
-              </p>
-            </div>
-          </div>
-
+          {/* RIGHT: QUICK ACTIONS (1fr) */}
           <div style={styles.card}>
             <h2 style={styles.cardTitle}>Quick Actions</h2>
             <div style={styles.cardContent}>
               <p>Manage your account and browse movies.</p>
-              <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: 12,
+                  marginTop: 16,
+                  flexWrap: "wrap",
+                }}
+              >
                 <button
                   style={{
                     ...styles.logoutButton,
                     background: UGA.red,
-                    border: 'none',
+                    border: "none",
                   }}
-                  onClick={() => router.push('/edit-profile')}
+                  onClick={() => router.push("/edit-profile")}
                 >
                   Edit Profile
                 </button>
+
                 <button
                   style={{
                     ...styles.logoutButton,
                     background: UGA.dark,
                     border: `1px solid ${UGA.border}`,
                   }}
-                  onClick={() => router.push('/')}
+                  onClick={() => router.push("/")}
                 >
                   Browse Movies
                 </button>
+
                 {isAdminUser && (
                   <button
                     style={{
@@ -254,7 +262,7 @@ export default function DashboardPage() {
                       background: UGA.dark,
                       border: `1px solid ${UGA.border}`,
                     }}
-                    onClick={() => router.push('/admin')}
+                    onClick={() => router.push("/admin")}
                   >
                     Admin Panel
                   </button>
@@ -262,6 +270,15 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
+
+          {/* ⭐ FULL-WIDTH ROW: RECENT BOOKINGS */}
+          <div style={{ gridColumn: "1 / -1", marginTop: 20 }}>
+            <div style={styles.card}>
+              <h2 style={styles.cardTitle}>Recent Bookings</h2>
+              <RecentBookings userId={user.id} />
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

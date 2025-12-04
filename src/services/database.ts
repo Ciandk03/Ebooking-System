@@ -185,6 +185,15 @@ export const showService = {
       throw new Error(`getShowsByMovieId failed: ${error.message || error}`);
     }
   },
+  async getShowById(showId: string): Promise<Showtime | null> {
+    console.log(`Fetching shows for showId=${showId} from 'shows' collection...`);
+    try {
+      const docRef = firestore.doc(showsCollection, showId);
+      const docSnap = await firestore.getDoc(docRef);
+      return docSnap.exists() ? mapDoc<Showtime>(docSnap) : null;
+    } catch (error) {
+      throw new Error(`getMovieById failed: ${error}`);
+    }},
 };
 
 
