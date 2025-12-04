@@ -453,7 +453,7 @@ export default function SeatSelectionPage() {
     }
   };
 
-  const handleConfirmBooking = async () => {
+  const handleCheckout = () => {
     if (!show || !movieId) return;
 
     if (totalTickets === 0) {
@@ -485,59 +485,26 @@ export default function SeatSelectionPage() {
       return;
     }
 
-    try {
-      setBookingLoading(true);
-      setError(null);
-      setInfo(null);
+    // Redirect to Payment page with booking details
+    const params = new URLSearchParams({
+      movieId,
+      showId: show.id,
+      seats: JSON.stringify(selectedSeats),
+      adultTickets: adultCount.toString(),
+      childTickets: childCount.toString(),
+      seniorTickets: seniorCount.toString(),
+      totalPrice: totalPrice.toString(),
+    });
 
-      const body = {
-        userId,
-        movieId,
-        showtimeId: show.id,
-        seats: selectedSeats,
-        adultTickets: adultCount,
-        childTickets: childCount,
-        seniorTickets: seniorCount,
-        totalPrice,
-        status: "confirmed",
-        bookingDate: new Date().toISOString(),
-      };
-
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-
-      const json: BookingResponse = await res.json();
-
-      if (!res.ok || !json.success) {
-        throw new Error(
-          json.error || json.message || "Failed to create booking"
-        );
-      }
-
-      setInfo("Booking confirmed! Redirecting to your dashboard…");
-      // You can change this route if you want a dedicated confirmation page
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 800);
-    } catch (err: any) {
-      console.error("SeatSelection: booking error", err);
-      setError(err?.message || "Failed to complete booking");
-    } finally {
-      setBookingLoading(false);
-    }
+    router.push(`/Payment?${params.toString()}`);
   };
 
   const disabledText =
     !show || totalTickets === 0
       ? "Select tickets and seats to continue"
       : totalTickets !== totalSelectedSeats
-      ? "Ticket count must match selected seats"
-      : "";
+        ? "Ticket count must match selected seats"
+        : "";
 
   return (
     <div style={styles.page}>
@@ -781,14 +748,14 @@ export default function SeatSelectionPage() {
 
               <button
                 type="button"
-                onClick={handleConfirmBooking}
+                onClick={handleCheckout}
                 disabled={!canConfirm}
                 style={{
                   ...styles.primaryButton,
                   ...(!canConfirm ? styles.primaryButtonDisabled : {}),
                 }}
               >
-                {bookingLoading ? "Processing…" : "Confirm Booking"}
+                Checkout
               </button>
             </div>
 
