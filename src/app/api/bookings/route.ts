@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as firestore from 'firebase/firestore';
 import { db } from '../../../../lib/firebase';
-import { bookingService } from '../../../services/database';
+import { bookingService, userService, movieService } from '../../../services/database';
 
+import { sendBookingConfirmationEmail } from '../../../utils/mailer';
+
+export const runtime = 'nodejs';
 
 // GET /api/bookings - Get all bookings or filter by userId
 export async function GET(request: NextRequest) {
@@ -98,6 +101,40 @@ export async function POST(request: NextRequest) {
         err,
       );
     }
+
+    // Try to send confirmation email (non-blocking)
+    try {
+      const user = await userService.getUserById(body.userId);
+      let movieTitle: string | undefined;
+
+      try {
+        const movie = await movieService.getMovieById(body.movieId);
+        movieTitle = movie?.title;
+      } catch (err) {
+        console.error('API: Failed to fetch movie for confirmation email', err);
+      }
+
+      if (user && user.email) {
+        await sendBookingConfirmationEmail({
+          to: user.email,
+          name: user.name,
+          bookingId,
+          movieTitle,
+          totalPrice: body.totalPrice,
+          seats: seatsArray,
+        });
+
+        console.log(`API: Booking confirmation email sent to ${user.email}`);
+      } else {
+        console.warn(
+          `API: Skipping booking confirmation email; user not found or missing email for userId=${body.userId}`,
+        );
+      }
+    } catch (err) {
+      console.error('API: Failed to send booking confirmation email', err);
+      // Do not throw here – booking itself has already succeeded.
+    }
+
 
     return NextResponse.json(
       {
