@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const UGA = {
@@ -23,12 +23,10 @@ const styles: Record<string, React.CSSProperties> = {
     borderTop: `4px solid ${UGA.red}`,
     fontFamily:
       "Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
-    display: "flex",
-    justifyContent: "center",
   },
   content: {
-    width: "100%",
-    maxWidth: 600,
+    maxWidth: 880,
+    margin: "0 auto",
   },
   header: {
     marginBottom: 24,
@@ -39,38 +37,119 @@ const styles: Record<string, React.CSSProperties> = {
     letterSpacing: 0.4,
     marginBottom: 6,
   },
+  muted: {
+    fontSize: 14,
+    color: UGA.gray,
+  },
   card: {
-    background: "radial-gradient(circle at top, #1b1f27 0, #050608 55%)",
+    background:
+      "radial-gradient(circle at top, #1b1f27 0, #050608 55%)",
     borderRadius: 16,
     border: `1px solid ${UGA.border}`,
     padding: 20,
     boxShadow: "0 18px 45px rgba(0,0,0,0.6)",
-    marginBottom: 24,
+    marginBottom: 20,
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 700,
-    marginBottom: 16,
-    borderBottom: `1px solid ${UGA.border}`,
-    paddingBottom: 12,
+    marginBottom: 12,
   },
   row: {
     display: "flex",
     justifyContent: "space-between",
-    marginBottom: 8,
+    alignItems: "center",
     fontSize: 14,
+    marginBottom: 6,
   },
   totalRow: {
     display: "flex",
     justifyContent: "space-between",
+    alignItems: "center",
+    fontSize: 16,
     fontWeight: 700,
+    marginTop: 10,
+    paddingTop: 10,
+    borderTop: `1px dashed ${UGA.border}`,
+  },
+  discountRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    fontSize: 14,
+    marginTop: 6,
+    color: "#facc15",
+  },
+  promoSection: {
     marginTop: 12,
     paddingTop: 12,
     borderTop: `1px dashed ${UGA.border}`,
-    fontSize: 16,
+  },
+  promoRow: {
+    display: "flex",
+    gap: 10,
+    alignItems: "center",
+    marginTop: 6,
+  },
+  promoInput: {
+    flex: 1,
+    padding: "8px 10px",
+    borderRadius: 999,
+    border: `1px solid ${UGA.border}`,
+    background: "#050608",
+    color: UGA.white,
+    fontSize: 13,
+  },
+  promoButton: {
+    padding: "8px 14px",
+    borderRadius: 999,
+    border: "none",
+    background: UGA.red,
+    color: UGA.white,
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+  promoNote: {
+    fontSize: 12,
+    color: UGA.gray,
+    marginTop: 6,
+  },
+  promoError: {
+    fontSize: 12,
+    color: "#f97373",
+    marginTop: 6,
+  },
+  promoSuccess: {
+    fontSize: 12,
+    color: "#4ade80",
+    marginTop: 6,
+  },
+  radioGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+    marginBottom: 12,
+  },
+  radioLabel: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: 10,
+    padding: 10,
+    borderRadius: 10,
+    border: `1px solid ${UGA.border}`,
+    cursor: "pointer",
+  },
+  radioSelected: {
+    borderColor: UGA.red,
+    background: "#111827",
+  },
+  formGroupRow: {
+    display: "flex",
+    gap: 12,
   },
   formGroup: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   label: {
     fontSize: 13,
@@ -86,56 +165,41 @@ const styles: Record<string, React.CSSProperties> = {
     background: "#050608",
     color: UGA.white,
     fontSize: 14,
+    outline: "none",
   },
-  radioGroup: {
+  footer: {
+    marginTop: 16,
     display: "flex",
     flexDirection: "column",
-    gap: 12,
-  },
-  radioLabel: {
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-    cursor: "pointer",
-    padding: 12,
-    borderRadius: 8,
-    border: `1px solid ${UGA.border}`,
-    background: "#111318",
-  },
-  radioSelected: {
-    borderColor: UGA.red,
-    background: "#1a0508",
+    alignItems: "flex-end",
   },
   primaryButton: {
-    width: "100%",
-    padding: "14px",
+    padding: "10px 18px",
     borderRadius: 999,
     border: "none",
     background: UGA.red,
     color: UGA.white,
+    fontSize: 14,
     fontWeight: 700,
-    fontSize: 15,
     cursor: "pointer",
-    boxShadow: "0 10px 28px rgba(186,12,47,0.45)",
+    boxShadow: "0 12px 30px rgba(186,12,47,0.45)",
+  },
+  secondaryButton: {
+    padding: "10px 18px",
+    borderRadius: 999,
+    border: `1px solid ${UGA.border}`,
+    background: "transparent",
+    color: UGA.gray,
+    fontSize: 14,
+    fontWeight: 500,
+    cursor: "pointer",
     marginTop: 12,
   },
-  primaryButtonDisabled: {
-    opacity: 0.5,
-    cursor: "not-allowed",
-    boxShadow: "none",
-  },
   error: {
-    padding: 10,
-    borderRadius: 8,
-    background: "#231016",
-    border: `1px solid ${UGA.red}`,
-    color: "#f9ccd6",
+    marginTop: 8,
+    marginBottom: 8,
     fontSize: 13,
-    marginBottom: 16,
-  },
-  muted: {
-    color: UGA.gray,
-    fontSize: 13,
+    color: "#f97373",
   },
 };
 
@@ -154,7 +218,17 @@ export default function PaymentPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"saved" | "new">("new");
+  const [paymentMethod, setPaymentMethod] =
+    useState<"saved" | "new">("new");
+
+  // Promo state
+  const [canUsePromotions, setCanUsePromotions] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoSuccess, setPromoSuccess] = useState<string | null>(null);
+  const [discountPercent, setDiscountPercent] = useState(0);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [finalTotal, setFinalTotal] = useState(totalPrice);
 
   // New card state
   const [cardNumber, setCardNumber] = useState("");
@@ -162,8 +236,22 @@ export default function PaymentPage() {
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
 
+  const hasSavedCard = useMemo(
+    () =>
+      !!(
+        user &&
+        user.paymentCards &&
+        Array.isArray(user.paymentCards) &&
+        user.paymentCards.length > 0
+      ),
+    [user],
+  );
+
+  const hasDiscount =
+    discountPercent > 0 && discountAmount > 0 && finalTotal < totalPrice;
+
+  // Fetch user profile for saved card + promo eligibility
   useEffect(() => {
-    // Check login and fetch profile for saved card
     const checkUser = async () => {
       try {
         const stored = localStorage.getItem("user");
@@ -171,12 +259,12 @@ export default function PaymentPage() {
           router.push("/Login");
           return;
         }
-        const userData = JSON.parse(stored);
 
-        // Fetch full profile to get payment info
         const res = await fetch("/api/users/profile", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken") || ""}`,
+            Authorization: `Bearer ${
+              localStorage.getItem("authToken") || ""
+            }`,
           },
         });
 
@@ -184,26 +272,102 @@ export default function PaymentPage() {
           const json = await res.json();
           if (json.success && json.data) {
             setUser(json.data);
-            // If user has saved cards, default to 'saved'
-            if (json.data.paymentCards && json.data.paymentCards.length > 0) {
+            setCanUsePromotions(!!json.data.subscribeToPromotions);
+
+            if (
+              json.data.paymentCards &&
+              json.data.paymentCards.length > 0
+            ) {
               setPaymentMethod("saved");
             }
           }
         } else {
-          // Fallback to basic local storage user if API fails (though payment won't be available)
-          setUser(userData);
+          // fallback: just use local user data (no cards / promos)
+          const parsed = JSON.parse(stored);
+          setUser(parsed);
         }
       } catch (err) {
         console.error("Payment: error checking user", err);
       }
     };
+
     checkUser();
   }, [router]);
+
+  const handleApplyPromo = async () => {
+    if (!user) {
+      setPromoError("You must be logged in to use a promo code.");
+      setPromoSuccess(null);
+      return;
+    }
+
+    if (!canUsePromotions) {
+      setPromoError(
+        "This account is not subscribed to promotions. Enable promotional emails in your profile to use promo codes.",
+      );
+      setPromoSuccess(null);
+      return;
+    }
+
+    if (!promoCode.trim()) {
+      setPromoError("Please enter a promo code.");
+      setPromoSuccess(null);
+      return;
+    }
+
+    try {
+      setPromoError(null);
+      setPromoSuccess(null);
+
+      const res = await fetch("/api/promotions/apply", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${
+            localStorage.getItem("authToken") || ""
+          }`,
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          code: promoCode.trim(),
+          totalPrice,
+        }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        throw new Error(
+          json.error || json.message || "Promo code is not valid",
+        );
+      }
+
+      const {
+        discountPercent: dp,
+        discountAmount: da,
+        finalTotal: ft,
+      } = json.data;
+
+      setDiscountPercent(dp);
+      setDiscountAmount(da);
+      setFinalTotal(ft);
+      setPromoSuccess(
+        `Promo applied: -$${da.toFixed(2)} (${dp}% off).`,
+      );
+    } catch (err: any) {
+      console.error("Payment: promo error", err);
+      setDiscountPercent(0);
+      setDiscountAmount(0);
+      setFinalTotal(totalPrice);
+      setPromoError(
+        err?.message || "Could not apply this promo code right now.",
+      );
+    }
+  };
 
   const handlePayment = async () => {
     if (!user || !movieId || !showId) return;
 
-    // Basic validation
     if (paymentMethod === "new") {
       if (!cardNumber || !cardName || !expiry || !cvv) {
         setError("Please fill in all payment fields.");
@@ -215,21 +379,27 @@ export default function PaymentPage() {
       setLoading(true);
       setError(null);
 
+      const seats = seatsStr ? JSON.parse(seatsStr) : [];
+
       const body = {
         userId: user.id,
         movieId,
         showtimeId: showId,
-        seats: seatsStr ? JSON.parse(seatsStr) : [],
+        seats,
         adultTickets,
         childTickets,
         seniorTickets,
-        totalPrice,
+        // store the discounted total if promo was applied
+        totalPrice: finalTotal,
         status: "confirmed",
         bookingDate: new Date().toISOString(),
         paymentDetails:
           paymentMethod === "saved"
             ? { type: "saved" }
-            : { type: "new", last4: cardNumber.slice(-4) },
+            : {
+                type: "new",
+                last4: cardNumber.replace(/\s/g, "").slice(-4),
+              },
       };
 
       const res = await fetch("/api/bookings", {
@@ -244,22 +414,22 @@ export default function PaymentPage() {
 
       if (!res.ok || !json.success) {
         throw new Error(
-          json.error || json.message || "Failed to create booking"
+          json.error || json.message || "Failed to create booking",
         );
       }
 
-      // Success – send to booking confirmation with order info
       const bookingId = json?.data?.id || "";
 
+      // Redirect to Booking Confirmation with final total
       const params = new URLSearchParams({
         bookingId,
-        movieId: movieId || "",
-        showId: showId || "",
-        seats: seatsStr || "[]",
+        movieId,
+        showId,
+        seats: JSON.stringify(seats),
         adultTickets: adultTickets.toString(),
         childTickets: childTickets.toString(),
         seniorTickets: seniorTickets.toString(),
-        totalPrice: totalPrice.toString(),
+        totalPrice: finalTotal.toString(),
       });
 
       router.push(`/BookingConfirmation?${params.toString()}`);
@@ -276,17 +446,19 @@ export default function PaymentPage() {
       <div style={styles.page}>
         <div style={styles.content}>
           <div style={styles.error}>
-            Invalid booking session. Please start over.
+            Invalid booking request. Please start again from the movie
+            page.
           </div>
-          <button onClick={() => router.push("/")} style={styles.primaryButton}>
-            Go Home
+          <button
+            style={styles.primaryButton}
+            onClick={() => router.push("/")}
+          >
+            Back to Home
           </button>
         </div>
       </div>
     );
   }
-
-  const hasSavedCard = user?.paymentCards && user.paymentCards.length > 0;
 
   return (
     <div style={styles.page}>
@@ -315,11 +487,63 @@ export default function PaymentPage() {
           </div>
           <div style={styles.row}>
             <span>Seats</span>
-            <span>{seatsStr ? JSON.parse(seatsStr).join(", ") : "None"}</span>
+            <span>
+              {seatsStr
+                ? JSON.parse(seatsStr).join(", ")
+                : "None"}
+            </span>
           </div>
-          <div style={styles.totalRow}>
-            <span>Total</span>
-            <span>${totalPrice.toFixed(2)}</span>
+
+          <div style={styles.promoSection}>
+            <div style={styles.row}>
+              <span>Subtotal</span>
+              <span>${totalPrice.toFixed(2)}</span>
+            </div>
+
+            {hasDiscount && (
+              <div style={styles.discountRow}>
+                <span>Promotion ({discountPercent}% off)</span>
+                <span>- ${discountAmount.toFixed(2)}</span>
+              </div>
+            )}
+
+            <div style={styles.promoRow}>
+              <input
+                type="text"
+                placeholder="Promo code"
+                style={styles.promoInput}
+                value={promoCode}
+                onChange={(e) =>
+                  setPromoCode(e.target.value.toUpperCase())
+                }
+              />
+              <button
+                type="button"
+                style={styles.promoButton}
+                onClick={handleApplyPromo}
+                disabled={loading}
+              >
+                Apply
+              </button>
+            </div>
+
+            {promoError && (
+              <div style={styles.promoError}>{promoError}</div>
+            )}
+            {promoSuccess && (
+              <div style={styles.promoSuccess}>{promoSuccess}</div>
+            )}
+            {!promoError && !promoSuccess && (
+              <div style={styles.promoNote}>
+                Promo codes are available for users subscribed to
+                promotional emails in their profile.
+              </div>
+            )}
+
+            <div style={styles.totalRow}>
+              <span>Total</span>
+              <span>${finalTotal.toFixed(2)}</span>
+            </div>
           </div>
         </section>
 
@@ -334,7 +558,9 @@ export default function PaymentPage() {
               <label
                 style={{
                   ...styles.radioLabel,
-                  ...(paymentMethod === "saved" ? styles.radioSelected : {}),
+                  ...(paymentMethod === "saved"
+                    ? styles.radioSelected
+                    : {}),
                 }}
                 onClick={() => setPaymentMethod("saved")}
               >
@@ -343,6 +569,7 @@ export default function PaymentPage() {
                   name="paymentMethod"
                   checked={paymentMethod === "saved"}
                   onChange={() => setPaymentMethod("saved")}
+                  style={{ marginTop: 3 }}
                 />
                 <div>
                   <div style={{ fontWeight: 600 }}>Saved Card</div>
@@ -357,7 +584,9 @@ export default function PaymentPage() {
             <label
               style={{
                 ...styles.radioLabel,
-                ...(paymentMethod === "new" ? styles.radioSelected : {}),
+                ...(paymentMethod === "new"
+                  ? styles.radioSelected
+                  : {}),
               }}
               onClick={() => setPaymentMethod("new")}
             >
@@ -366,8 +595,11 @@ export default function PaymentPage() {
                 name="paymentMethod"
                 checked={paymentMethod === "new"}
                 onChange={() => setPaymentMethod("new")}
+                style={{ marginTop: 3 }}
               />
-              <div style={{ fontWeight: 600 }}>New Credit/Debit Card</div>
+              <div style={{ fontWeight: 600 }}>
+                New Credit/Debit Card
+              </div>
             </label>
           </div>
 
@@ -382,32 +614,31 @@ export default function PaymentPage() {
                   value={cardNumber}
                   maxLength={19}
                   onChange={(e) => {
-                    // Allow only digits
                     const val = e.target.value.replace(/\D/g, "");
-                    // Limit to 16 digits
                     const truncated = val.slice(0, 16);
-                    // Add spaces every 4 digits
                     const formatted = truncated.replace(
                       /(\d{4})(?=\d)/g,
-                      "$1 "
+                      "$1 ",
                     );
                     setCardNumber(formatted);
                   }}
                 />
               </div>
+
               <div style={styles.formGroup}>
-                <label style={styles.label}>Cardholder Name</label>
+                <label style={styles.label}>Name on Card</label>
                 <input
                   type="text"
-                  placeholder="John Doe"
+                  placeholder="Full name"
                   style={styles.input}
                   value={cardName}
                   onChange={(e) => setCardName(e.target.value)}
                 />
               </div>
-              <div style={{ display: "flex", gap: 12 }}>
+
+              <div style={styles.formGroupRow}>
                 <div style={{ ...styles.formGroup, flex: 1 }}>
-                  <label style={styles.label}>Expiry</label>
+                  <label style={styles.label}>Expiry (MM/YY)</label>
                   <input
                     type="text"
                     placeholder="MM/YY"
@@ -416,9 +647,7 @@ export default function PaymentPage() {
                     maxLength={5}
                     onChange={(e) => {
                       let val = e.target.value.replace(/\D/g, "");
-                      if (val.length > 4) val = val.slice(0, 4);
-
-                      if (val.length > 2) {
+                      if (val.length >= 3) {
                         val = `${val.slice(0, 2)}/${val.slice(2)}`;
                       }
                       setExpiry(val);
@@ -444,30 +673,26 @@ export default function PaymentPage() {
           )}
         </section>
 
-        <button
-          onClick={handlePayment}
-          disabled={loading}
-          style={{
-            ...styles.primaryButton,
-            ...(loading ? styles.primaryButtonDisabled : {}),
-          }}
-        >
-          {loading ? "Processing..." : `Pay $${totalPrice.toFixed(2)}`}
-        </button>
-
-        <button
-          onClick={() => router.back()}
-          style={{
-            ...styles.primaryButton,
-            background: "transparent",
-            border: `1px solid ${UGA.border}`,
-            boxShadow: "none",
-            marginTop: 12,
-          }}
-        >
-          Cancel
-        </button>
+        {/* FOOTER */}
+        <div style={styles.footer}>
+          <button
+            style={styles.primaryButton}
+            onClick={handlePayment}
+            disabled={loading}
+          >
+            {loading ? "Processing..." : "Pay & Confirm Booking"}
+          </button>
+          <button
+            style={styles.secondaryButton}
+            type="button"
+            onClick={() => router.back()}
+            disabled={loading}
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   );
 }
+
