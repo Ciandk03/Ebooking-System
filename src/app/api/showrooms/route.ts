@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import * as firestore from 'firebase/firestore';
 import { showtimesCollection } from '../../../services/database';
 
-// Optional, but can help with caching behavior
 export const runtime = 'nodejs';
-// or: export const dynamic = 'force-dynamic';
 
 export async function GET(_request: NextRequest) {
   console.log('API: GET /api/showrooms - Fetching all showrooms');

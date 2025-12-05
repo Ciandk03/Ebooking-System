@@ -14,7 +14,6 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         console.log('API: User data received:', JSON.stringify(body, null, 2));
         
-        // Validate required fields
         const requiredFields = ['name', 'email', 'password'];
         const missingFields = requiredFields.filter(field => !body[field]);
         
@@ -65,14 +64,14 @@ export async function POST(request: NextRequest) {
         }
         
         const verificationToken = randomBytes(32).toString('hex');
-        const verificationExpires = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24 hours
+        const verificationExpires = new Date(Date.now() + 1000 * 60 * 60 * 24);
 
         const userId = await userService.createUser({
         name: body.name,
         email: body.email,
         phone: body.phone,
         password: hashedPassword,
-        address: body.address, // Store as string, will be parsed by app
+        address: body.address,
         payment: encryptedPayment,
         active: false,
         isAdmin: false,
@@ -94,7 +93,6 @@ export async function POST(request: NextRequest) {
           console.log('API: Verification email sent');
         } catch (mailErr) {
           console.error('API: Failed to send verification email:', mailErr);
-          // Intentionally do NOT fail the request — user is already created.
         }
         console.log(`API: User created successfully with ID: ${userId}`);
         return NextResponse.json({
@@ -116,7 +114,7 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// Get all users (for admin purposes)
+// Get all users (for admin)
 export async function GET(request: NextRequest) {
     console.log('API: GET /api/users - Fetching all users');
     

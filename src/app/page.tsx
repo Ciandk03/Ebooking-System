@@ -115,7 +115,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
 };
 
-// SAME HELPERS AS IN Movie.tsx TO KEEP DATES CONSISTENT ---
+// Unused functions - used to generate data, but now data is from database
 function hashString(s: string) {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < s.length; i++) {
@@ -125,11 +125,9 @@ function hashString(s: string) {
   return h >>> 0;
 }
 function seededRand(seed: number) {
-  // xorshift32
   let x = seed || 123456789;
   return () => {
     x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
-    // map to [0,1)
     return ((x >>> 0) % 1_000_000) / 1_000_000;
   };
 }
@@ -137,25 +135,24 @@ function isoForDayOffset(offset: number) {
   const d = new Date();
   d.setHours(0,0,0,0);
   d.setDate(d.getDate() + offset);
-  return d.toISOString().slice(0,10); // YYYY-MM-DD
+  return d.toISOString().slice(0,10);
 }
 function labelForISO(iso: string) {
   const d = new Date(iso + "T00:00:00");
-  return d.toLocaleDateString(undefined, { weekday: "short", month: "numeric", day: "numeric" }); // e.g., Mon 10/27
+  return d.toLocaleDateString(undefined, { weekday: "short", month: "numeric", day: "numeric" });
 }
 function randomDatesForMovie(m: Movie, lookaheadDays = 21): string[] {
   const seed = hashString(String(m.id ?? m.title ?? "movie"));
   const rand = seededRand(seed);
-  const count = 3 + Math.floor(rand() * 6); // 3..8 dates
+  const count = 3 + Math.floor(rand() * 6);
   const set = new Set<number>();
-  // bias toward nearer dates a bit
   while (set.size < count) {
-    const r = Math.floor(Math.pow(rand(), 1.7) * lookaheadDays); // 0..20 skewed low
+    const r = Math.floor(Math.pow(rand(), 1.7) * lookaheadDays);
     set.add(r);
   }
   return Array.from(set).sort((a,b)=>a-b).map(isoForDayOffset);
 }
-// END OF SAME HELPERS AS IN Movie.tsx TO KEEP DATES CONSISTENT ---
+// End of unused functions
 
 function deriveStatus(m: Movie) {
   if (m.currentlyRunning) {
@@ -268,7 +265,6 @@ export default function HomePage() {
       .filter((m) => deriveStatus(m) === tab)
       .filter((m) => (q ? m.title.toLowerCase().includes(q) : true))
       .filter((m) => (genre === "ALL" ? true : m.genres?.includes(genre)))
-      // filter by day if selected
       .filter((m) => {
         if (day === "ALL") return true;
         const ds = datesById.get(String(m.id)) || [];
@@ -332,7 +328,6 @@ export default function HomePage() {
               ))}
             </select>
 
-            {/* Day filter */}
             <select
               style={styles.select}
               value={day}
@@ -351,7 +346,7 @@ export default function HomePage() {
               onClick={() => {
                 setQuery("");
                 setGenre("ALL");
-                setDay("ALL"); // reset day too
+                setDay("ALL");
               }}
             >
               Reset
@@ -362,7 +357,6 @@ export default function HomePage() {
                 <span style={{ fontSize: 14, color: UGA.gray }}>
                   Welcome, {user.name}
                 </span>
-                {/* Always show Edit Profile for signed-in users */}
                 <button
                   style={styles.ghostBtn}
                   onClick={() => router.push('/dashboard')}
@@ -370,7 +364,6 @@ export default function HomePage() {
                   Account
                 </button>
 
-                {/* If user is an admin also show Admin Panel alongside Edit Profile */}
                 {isAdminUser && (
                   <button
                     style={styles.ghostBtn}

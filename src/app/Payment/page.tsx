@@ -230,12 +230,10 @@ export default function PaymentPage() {
 
   const TAX_RATE = 0.09;
 
-  // Final total BEFORE TAX: subtotal - discount
   const subtotalAfterDiscount = useMemo(() => {
     return Math.max(0, totalPrice - discountAmount);
   }, [totalPrice, discountAmount]);
 
-  // Final total WITH TAX
   const finalTotal = useMemo(() => {
     return Number((subtotalAfterDiscount * (1 + TAX_RATE)).toFixed(2));
   }, [subtotalAfterDiscount]);
@@ -260,7 +258,7 @@ export default function PaymentPage() {
   const hasDiscount =
     discountPercent > 0 && discountAmount > 0 && finalTotal < totalPrice;
 
-  // Fetch user profile for saved card + promo eligibility
+  // Fetch user profile
   useEffect(() => {
     const checkUser = async () => {
       try {
@@ -287,7 +285,6 @@ export default function PaymentPage() {
             }
           }
         } else {
-          // fallback: just use local user data (no cards / promos)
           const parsed = JSON.parse(stored);
           setUser(parsed);
         }
@@ -388,7 +385,6 @@ export default function PaymentPage() {
         adultTickets,
         childTickets,
         seniorTickets,
-        // store the discounted total if promo was applied
         totalPrice: finalTotal,
         status: "confirmed",
         bookingDate: new Date().toISOString(),
@@ -419,7 +415,6 @@ export default function PaymentPage() {
 
       const bookingId = json?.data?.id || "";
 
-      // Redirect to Booking Confirmation with final total
       const params = new URLSearchParams({
         bookingId,
         movieId,
@@ -463,7 +458,6 @@ export default function PaymentPage() {
           <div style={styles.muted}>Complete your purchase</div>
         </header>
 
-        {/* ORDER SUMMARY */}
         <section style={styles.card}>
           <div style={styles.cardTitle}>Order Summary</div>
           <div style={styles.row}>
@@ -539,7 +533,6 @@ export default function PaymentPage() {
           </div>
         </section>
 
-        {/* PAYMENT METHOD */}
         <section style={styles.card}>
           <div style={styles.cardTitle}>Payment Method</div>
 
@@ -659,7 +652,6 @@ export default function PaymentPage() {
           )}
         </section>
 
-        {/* FOOTER */}
         <div style={styles.footer}>
           <button
             style={styles.primaryButton}

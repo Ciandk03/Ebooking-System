@@ -1,7 +1,7 @@
 import CryptoJS from 'crypto-js';
 import { PaymentCard } from '../types/database';
 
-// Secret key for encryption
+// Encryption
 const SECRET_KEY = process.env.ENCRYPTION_KEY || 'your-secret-key-here-change-in-production';
 
 export function encrypt(text: string): string {

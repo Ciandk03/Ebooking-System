@@ -1,4 +1,4 @@
-// Database model interfaces for the ebooking system
+// Types used between database and backend for easier comm
 
 export interface Movie {
   id: string;
@@ -10,7 +10,7 @@ export interface Movie {
   genres: string[];
   currentlyRunning: boolean;
   comingSoon: boolean;
-  duration: number; // in minutes
+  duration: number;
   releaseDate: string;
   cast?: string[];
   director?: string;
@@ -20,8 +20,8 @@ export interface Movie {
 export interface Showtime {
   id: string;
   movieId: string;
-  date: string; // YYYY-MM-DD format
-  startTime: string; // HH:MM format
+  date: string;
+  startTime: string;
   endTime: string;
   showroom: string;
   availableSeats: string[];
@@ -36,7 +36,7 @@ export interface Booking {
   showtimeId: string;
   userId: string;
   movieId: string;
-  seats: string[]; // Array of seat numbers like ["A1", "A2", "B5"]
+  seats: string[];
   childTickets: number;
   adultTickets: number;
   seniorTickets: number;
@@ -61,10 +61,10 @@ export interface User {
   email: string;
   name: string;
   phone?: string;
-  password?: string; // Encrypted password
-  address?: string; // Optional address as string
-  payment?: string; // Optional encrypted payment card info (JSON string)
-  subscribeToPromotions?: boolean; // Optional promotions subscription
+  password?: string;
+  address?: string;
+  payment?: string;
+  subscribeToPromotions?: boolean;
   createdAt: Date;
   updatedAt: Date;
   isAdmin: boolean;

@@ -1,4 +1,3 @@
-// Updated DashboardPage with RecentBookings component
 "use client";
 
 import { useState, useEffect } from "react";
@@ -53,7 +52,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   content: {
     display: "grid",
-    gridTemplateColumns: "3fr 1fr", // ⭐ 75% / 25% layout
+    gridTemplateColumns: "3fr 1fr",
     gap: 24,
     minWidth: 0,
   },
@@ -171,7 +170,6 @@ export default function DashboardPage() {
     <div style={styles.page}>
       <div style={styles.container}>
 
-        {/* HEADER */}
         <div style={styles.header}>
           <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
             <button style={styles.backButton} onClick={() => router.push("/")}>
@@ -184,10 +182,8 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* ⭐ GRID LAYOUT */}
         <div style={styles.content}>
 
-          {/* LEFT: ACCOUNT INFO (3fr) */}
           <div style={styles.card}>
             <h2 style={styles.cardTitle}>Account Information</h2>
 
@@ -219,7 +215,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* RIGHT: QUICK ACTIONS (1fr) */}
           <div style={styles.card}>
             <h2 style={styles.cardTitle}>Quick Actions</h2>
             <div style={styles.cardContent}>
@@ -271,7 +266,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* ⭐ FULL-WIDTH ROW: RECENT BOOKINGS */}
           <div style={{ gridColumn: "1 / -1", marginTop: 20 }}>
             <div style={styles.card}>
               <h2 style={styles.cardTitle}>Recent Bookings</h2>

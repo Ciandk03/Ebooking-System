@@ -1,11 +1,12 @@
+// Scrapped showtime component 
+
 import React from "react";
 import Image from "next/image";
 
 interface showtimesProps {
     id: number;
     title: string;
-    times: string[] //times can be changed to any better data type
-    //possibly add functions that the showtimes card uses
+    times: string[]
 }
 
 const Showtimes: React.FC<showtimesProps> = ({

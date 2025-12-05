@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { movieService } from '../../../../services/database';
 
-// GET /api/movies/[id] - Get movie by ID
+// GET - Get movie by ID
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -41,7 +41,7 @@ export async function GET(
   }
 }
 
-// PUT /api/movies/[id] - Update movie
+// PUT - Update movie
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -73,7 +73,7 @@ export async function PUT(
   }
 }
 
-// DELETE /api/movies/[id] - Delete movie
+// DELETE - Delete movie
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

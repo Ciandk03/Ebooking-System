@@ -1,4 +1,4 @@
-// src/app/api/admin/promotions/route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import * as firestore from 'firebase/firestore';
@@ -6,9 +6,8 @@ import { db } from '../../../../../lib/firebase';
 import { userService } from '../../../../services/database';
 import { sendPromotionEmail } from '../../../../utils/mailer';
 
-export const runtime = 'nodejs'; // IMPORTANT
+export const runtime = 'nodejs';
 
-// Helper: verify JWT from Authorization header
 function verifyToken(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -35,7 +34,7 @@ export async function POST(request: NextRequest) {
   console.log('API: POST /api/admin/promotions - Create promotion & email subscribers');
 
   try {
-    // 1. Auth + admin check
+    // Admin check
     const payload = verifyToken(request);
     if (!payload) {
       return NextResponse.json(
@@ -53,7 +52,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Read + validate body
+    // Read and validate body
     const body = await request.json();
     const { code, startDate, endDate, discount } = body || {};
 
@@ -84,7 +83,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Save promotion to Firestore
+    // Save promotion
     const now = firestore.Timestamp.fromDate(new Date());
     const docRef = await firestore.addDoc(promotionsCollection, {
       code,
@@ -98,7 +97,7 @@ export async function POST(request: NextRequest) {
 
     console.log('API: Promotion created with ID:', docRef.id);
 
-    // 4. Fetch subscribers
+    // Fetch subs
     const allUsers = await userService.getAllUsers();
     const subscribers = allUsers.filter(
       (u: any) => u.subscribeToPromotions && u.email,
@@ -108,7 +107,7 @@ export async function POST(request: NextRequest) {
       `API: Found ${subscribers.length} users subscribed to promotions`,
     );
 
-    // 5. Email all subscribers
+    // Email subs
     const results = await Promise.all(
       subscribers.map(async (u: any) => {
         try {

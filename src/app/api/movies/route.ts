@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { movieService } from '../../../services/database';
 
-// GET /api/movies - Get all movies
+// GET - Get all movies
 export async function GET() {
   console.log('API: GET /api/movies - Fetching all movies');
   
@@ -27,7 +27,7 @@ export async function GET() {
   }
 }
 
-// POST /api/movies - Create a new movie
+// POST - Create a new movie
 export async function POST(request: NextRequest) {
   console.log('API: POST /api/movies - Creating new movie');
   
@@ -35,7 +35,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('API: Movie data received:', JSON.stringify(body, null, 2));
     
-    // Validate required fields
     const requiredFields = ['title', 'poster', 'rating', 'details', 'genres'];
     const missingFields = requiredFields.filter(field => !body[field]);
     

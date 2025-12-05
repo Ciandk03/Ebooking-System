@@ -15,7 +15,7 @@ import {
 
 interface PromoFormState {
   code: string;
-  startDate: string; // e.g., "2025-12-01"
+  startDate: string;
   endDate: string;
   discount: number;
 }

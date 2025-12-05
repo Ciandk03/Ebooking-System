@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { showtimeService } from '../../../services/database';
 
-// GET /api/showtimes - Get all showtimes or filter by movieId
+// GET - Get all showtimes or filter by movieId
 export async function GET(request: NextRequest) {
   console.log('API: GET /api/showtimes - Fetching showtimes');
   

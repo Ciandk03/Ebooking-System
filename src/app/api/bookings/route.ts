@@ -7,7 +7,7 @@ import { sendBookingConfirmationEmail } from '../../../utils/mailer';
 
 export const runtime = 'nodejs';
 
-// GET /api/bookings - Get all bookings or filter by userId
+// GET - Get all bookings or filter by userId
 export async function GET(request: NextRequest) {
   console.log('API: GET /api/bookings - Fetching bookings');
 
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/bookings - Create a new booking
+// POST - Create a new booking
 export async function POST(request: NextRequest) {
   console.log('API: POST /api/bookings - Creating new booking');
 
@@ -51,7 +51,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('API: Booking data received:', JSON.stringify(body, null, 2));
 
-    // Validate required fields
     const requiredFields = ['userId', 'movieId', 'showtimeId', 'seats', 'totalPrice'];
     const missingFields = requiredFields.filter(field => !body[field]);
 
@@ -94,15 +93,12 @@ export async function POST(request: NextRequest) {
         );
       }
     } catch (err) {
-      // Booking is created, but we failed to update the show document.
-      // Log a warning but still return success so the user isn't blocked.
       console.error(
         'API: Warning – booking created but failed to update show.availableSeats',
         err,
       );
     }
 
-    // Try to send confirmation email (non-blocking)
     try {
       const user = await userService.getUserById(body.userId);
       let movieTitle: string | undefined;
@@ -132,7 +128,6 @@ export async function POST(request: NextRequest) {
       }
     } catch (err) {
       console.error('API: Failed to send booking confirmation email', err);
-      // Do not throw here – booking itself has already succeeded.
     }
 
 

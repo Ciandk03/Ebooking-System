@@ -108,7 +108,6 @@ export default function FindShowtimePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch shows from /api/movies/[id]/shows
   useEffect(() => {
     if (!movieId) return;
 
@@ -119,7 +118,7 @@ export default function FindShowtimePage() {
 
         const res = await fetch(`/api/movies/${movieId}/shows`);
 
-        const text = await res.text(); // read raw body once
+        const text = await res.text();
         let json: any;
         try {
           json = text ? JSON.parse(text) : null;
@@ -144,27 +143,23 @@ export default function FindShowtimePage() {
     fetchShows();
   }, [movieId]);
 
-  // Unique list of dates from shows
   const dateOptions = useMemo(() => {
     const unique = Array.from(new Set(shows.map((s) => s.date)));
     unique.sort();
     return unique;
   }, [shows]);
 
-  // When we first get dates, default to the first one
   useEffect(() => {
     if (!selectedDate && dateOptions.length > 0) {
       setSelectedDate(dateOptions[0]);
     }
   }, [dateOptions, selectedDate]);
 
-  // Shows for currently selected date
   const showsForSelectedDate = useMemo(
     () => (selectedDate ? shows.filter((s) => s.date === selectedDate) : []),
     [shows, selectedDate]
   );
 
-  // Keep selectedShowId in sync when date or shows change
   useEffect(() => {
     if (!selectedDate) {
       setSelectedShowId("");
@@ -202,7 +197,6 @@ export default function FindShowtimePage() {
       return;
     }
 
-    // Go to uncreated seat selection page
     router.push(
       `/SeatSelection?showId=${encodeURIComponent(
         selectedShowId
@@ -241,7 +235,6 @@ export default function FindShowtimePage() {
 
         <form onSubmit={handleSubmit}>
           <div style={styles.body}>
-            {/* MOVIE TITLE (READ-ONLY) */}
             <div>
               <div style={styles.label}>Movie</div>
               <input
@@ -252,7 +245,6 @@ export default function FindShowtimePage() {
               />
             </div>
 
-            {/* ERROR / LOADING STATE */}
             {loading && (
               <div style={{ ...styles.muted, fontSize: 13 }}>
                 Loading showtimes for this movie…
@@ -278,7 +270,6 @@ export default function FindShowtimePage() {
               </div>
             )}
 
-            {/* DATE DROPDOWN */}
             {shows.length > 0 && (
               <>
                 <div>
@@ -299,7 +290,6 @@ export default function FindShowtimePage() {
                   </select>
                 </div>
 
-                {/* SHOWTIME DROPDOWN */}
                 <div>
                   <div style={styles.label}>Select Showtime</div>
                   <select
@@ -327,7 +317,6 @@ export default function FindShowtimePage() {
               Continue
             </button>
 
-            {/* SUMMARY */}
             <div style={styles.summary}>
               <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 6 }}>
                 📋 Selection Summary

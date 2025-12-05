@@ -150,7 +150,6 @@ export default function AdminPage() {
 
   const loadStats = async () => {
     try {
-      // In a real application, you would fetch actual stats from your API
       setStats({
         totalUsers: 150,
         totalMovies: 25,

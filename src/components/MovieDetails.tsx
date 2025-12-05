@@ -237,7 +237,6 @@ const styles: Record<string, React.CSSProperties> = {
     border: "none",
   },
 
-  // Dates + Showtimes sections (matching UGA style)
   showtimesSection: {
     marginTop: 32,
     padding: 24,
@@ -287,10 +286,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
 };
 
-// keep in sync with Booking/MovieCard
+// Unused dummy data, now from database
 const SHOWTIMES = ["2:00 PM", "5:00 PM", "8:00 PM"];
 
-// SAME HELPERS AS IN Movie.tsx TO KEEP DATES CONSISTENT
+// Unused functions for dummy data
 function hashString(s: string) {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < s.length; i++) {
@@ -327,7 +326,7 @@ function randomDatesForMovie(seedKey: string, lookaheadDays = 21): string[] {
   }
   return Array.from(set).sort((a,b)=>a-b).map(isoForDayOffset);
 }
-// END OF SAME HELPERS AS IN Movie.tsx TO KEEP DATES CONSISTENT
+// End of unused functions
 
 function deriveStatus(movie: MovieDetailsProps) {
   if (movie.currentlyRunning) return "RUNNING";
@@ -365,7 +364,6 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({
   const [hoveredShowtime, setHoveredShowtime] = useState<string | null>(null);
   const status = deriveStatus({ id, title, poster, rating, details, trailer, genres, duration, releaseDate, currentlyRunning, comingSoon });
 
-  // Dates + selected date
   const dateOptions = useMemo(() => randomDatesForMovie(id || title || 'movie'), [id, title]);
   const [selectedDate, setSelectedDate] = useState<string>('');
 
@@ -464,7 +462,6 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({
             )}
           </div>
 
-          {/* Always show the credits section; show placeholders when data is missing so admins/users can see the fields */}
           <div style={styles.creditsSection}>
             <h3 style={styles.creditsTitle}>Behind the Scenes</h3>
             <div style={styles.creditsGrid}>

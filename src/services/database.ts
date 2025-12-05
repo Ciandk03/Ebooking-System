@@ -169,10 +169,8 @@ export const showService = {
       );
       const snapshot = await firestore.getDocs(q);
 
-      // Use mapDoc so each show also gets `id`, createdAt, updatedAt fields
       const shows = snapshot.docs.map(mapDoc<Showtime>);
 
-      // Sort by date then startTime for nicer display
       shows.sort((a: any, b: any) => {
         const dateCmp = (a.date || '').localeCompare(b.date || '');
         if (dateCmp !== 0) return dateCmp;
@@ -195,9 +193,6 @@ export const showService = {
       throw new Error(`getMovieById failed: ${error}`);
     }},
 };
-
-
-
 
 
 // Bookings

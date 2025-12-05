@@ -1,4 +1,3 @@
-// src/app/api/promotions/apply/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import * as firestore from 'firebase/firestore';
 import { db } from '../../../../../lib/firebase';
@@ -26,7 +25,6 @@ export async function POST(request: NextRequest) {
 
     const trimmedCode = String(code).trim().toUpperCase();
 
-    // 1. Check user + subscription
     const user = await userService.getUserById(userId);
     if (!user) {
       return NextResponse.json(
@@ -46,7 +44,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Find promotion by code
     const q = firestore.query(
       promotionsCollection,
       firestore.where('code', '==', trimmedCode),
@@ -68,7 +65,6 @@ export async function POST(request: NextRequest) {
     const startDateStr = promoDoc.startDate as string | undefined; // "2025-12-01"
     const endDateStr = promoDoc.endDate as string | undefined;
 
-    // 3. Validate dates (if present)
     const now = new Date();
     let validByDate = true;
 
@@ -92,7 +88,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Compute discount
     const base = Number(totalPrice) || 0;
     if (base <= 0 || !Number.isFinite(base)) {
       return NextResponse.json(

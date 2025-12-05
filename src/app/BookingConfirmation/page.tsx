@@ -174,7 +174,7 @@ export default function BookingConfirmationPage() {
     [totalPriceStr],
   );
 
-  // Fetch movie title for nicer order details
+  // Fetch movie title
   useEffect(() => {
     if (!movieId) return;
 
