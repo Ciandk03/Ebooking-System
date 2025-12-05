@@ -42,8 +42,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: UGA.gray,
   },
   card: {
-    background:
-      "radial-gradient(circle at top, #1b1f27 0, #050608 55%)",
+    background: "radial-gradient(circle at top, #1b1f27 0, #050608 55%)",
     borderRadius: 16,
     border: `1px solid ${UGA.border}`,
     padding: 20,
@@ -218,17 +217,28 @@ export default function PaymentPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
-  const [paymentMethod, setPaymentMethod] =
-    useState<"saved" | "new">("new");
+  const [paymentMethod, setPaymentMethod] = useState<"saved" | "new">("new");
 
   // Promo state
   const [canUsePromotions, setCanUsePromotions] = useState(false);
   const [promoCode, setPromoCode] = useState("");
   const [promoError, setPromoError] = useState<string | null>(null);
   const [promoSuccess, setPromoSuccess] = useState<string | null>(null);
+  // Promo / tax state
   const [discountPercent, setDiscountPercent] = useState(0);
   const [discountAmount, setDiscountAmount] = useState(0);
-  const [finalTotal, setFinalTotal] = useState(totalPrice);
+
+  const TAX_RATE = 0.09;
+
+  // Final total BEFORE TAX: subtotal - discount
+  const subtotalAfterDiscount = useMemo(() => {
+    return Math.max(0, totalPrice - discountAmount);
+  }, [totalPrice, discountAmount]);
+
+  // Final total WITH TAX
+  const finalTotal = useMemo(() => {
+    return Number((subtotalAfterDiscount * (1 + TAX_RATE)).toFixed(2));
+  }, [subtotalAfterDiscount]);
 
   // New card state
   const [cardNumber, setCardNumber] = useState("");
@@ -244,7 +254,7 @@ export default function PaymentPage() {
         Array.isArray(user.paymentCards) &&
         user.paymentCards.length > 0
       ),
-    [user],
+    [user]
   );
 
   const hasDiscount =
@@ -262,9 +272,7 @@ export default function PaymentPage() {
 
         const res = await fetch("/api/users/profile", {
           headers: {
-            Authorization: `Bearer ${
-              localStorage.getItem("authToken") || ""
-            }`,
+            Authorization: `Bearer ${localStorage.getItem("authToken") || ""}`,
           },
         });
 
@@ -274,10 +282,7 @@ export default function PaymentPage() {
             setUser(json.data);
             setCanUsePromotions(!!json.data.subscribeToPromotions);
 
-            if (
-              json.data.paymentCards &&
-              json.data.paymentCards.length > 0
-            ) {
+            if (json.data.paymentCards && json.data.paymentCards.length > 0) {
               setPaymentMethod("saved");
             }
           }
@@ -303,7 +308,7 @@ export default function PaymentPage() {
 
     if (!canUsePromotions) {
       setPromoError(
-        "This account is not subscribed to promotions. Enable promotional emails in your profile to use promo codes.",
+        "This account is not subscribed to promotions. Enable promotional emails in your profile to use promo codes."
       );
       setPromoSuccess(null);
       return;
@@ -323,9 +328,7 @@ export default function PaymentPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${
-            localStorage.getItem("authToken") || ""
-          }`,
+          Authorization: `Bearer ${localStorage.getItem("authToken") || ""}`,
         },
         body: JSON.stringify({
           userId: user.id,
@@ -338,7 +341,7 @@ export default function PaymentPage() {
 
       if (!res.ok || !json.success) {
         throw new Error(
-          json.error || json.message || "Promo code is not valid",
+          json.error || json.message || "Promo code is not valid"
         );
       }
 
@@ -350,17 +353,13 @@ export default function PaymentPage() {
 
       setDiscountPercent(dp);
       setDiscountAmount(da);
-      setFinalTotal(ft);
-      setPromoSuccess(
-        `Promo applied: -$${da.toFixed(2)} (${dp}% off).`,
-      );
+      setPromoSuccess(`Promo applied: -$${da.toFixed(2)} (${dp}% off).`);
     } catch (err: any) {
       console.error("Payment: promo error", err);
       setDiscountPercent(0);
       setDiscountAmount(0);
-      setFinalTotal(totalPrice);
       setPromoError(
-        err?.message || "Could not apply this promo code right now.",
+        err?.message || "Could not apply this promo code right now."
       );
     }
   };
@@ -414,7 +413,7 @@ export default function PaymentPage() {
 
       if (!res.ok || !json.success) {
         throw new Error(
-          json.error || json.message || "Failed to create booking",
+          json.error || json.message || "Failed to create booking"
         );
       }
 
@@ -446,13 +445,9 @@ export default function PaymentPage() {
       <div style={styles.page}>
         <div style={styles.content}>
           <div style={styles.error}>
-            Invalid booking request. Please start again from the movie
-            page.
+            Invalid booking request. Please start again from the movie page.
           </div>
-          <button
-            style={styles.primaryButton}
-            onClick={() => router.push("/")}
-          >
+          <button style={styles.primaryButton} onClick={() => router.push("/")}>
             Back to Home
           </button>
         </div>
@@ -487,11 +482,7 @@ export default function PaymentPage() {
           </div>
           <div style={styles.row}>
             <span>Seats</span>
-            <span>
-              {seatsStr
-                ? JSON.parse(seatsStr).join(", ")
-                : "None"}
-            </span>
+            <span>{seatsStr ? JSON.parse(seatsStr).join(", ") : "None"}</span>
           </div>
 
           <div style={styles.promoSection}>
@@ -506,6 +497,11 @@ export default function PaymentPage() {
                 <span>- ${discountAmount.toFixed(2)}</span>
               </div>
             )}
+            <div style={styles.row}>
+              <span>Sales Tax (9%)</span>
+              <span>${(subtotalAfterDiscount * TAX_RATE).toFixed(2)}</span>
+            </div>
+            
 
             <div style={styles.promoRow}>
               <input
@@ -513,9 +509,7 @@ export default function PaymentPage() {
                 placeholder="Promo code"
                 style={styles.promoInput}
                 value={promoCode}
-                onChange={(e) =>
-                  setPromoCode(e.target.value.toUpperCase())
-                }
+                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
               />
               <button
                 type="button"
@@ -527,16 +521,14 @@ export default function PaymentPage() {
               </button>
             </div>
 
-            {promoError && (
-              <div style={styles.promoError}>{promoError}</div>
-            )}
+            {promoError && <div style={styles.promoError}>{promoError}</div>}
             {promoSuccess && (
               <div style={styles.promoSuccess}>{promoSuccess}</div>
             )}
             {!promoError && !promoSuccess && (
               <div style={styles.promoNote}>
-                Promo codes are available for users subscribed to
-                promotional emails in their profile.
+                Promo codes are available for users subscribed to promotional
+                emails in their profile.
               </div>
             )}
 
@@ -558,9 +550,7 @@ export default function PaymentPage() {
               <label
                 style={{
                   ...styles.radioLabel,
-                  ...(paymentMethod === "saved"
-                    ? styles.radioSelected
-                    : {}),
+                  ...(paymentMethod === "saved" ? styles.radioSelected : {}),
                 }}
                 onClick={() => setPaymentMethod("saved")}
               >
@@ -584,9 +574,7 @@ export default function PaymentPage() {
             <label
               style={{
                 ...styles.radioLabel,
-                ...(paymentMethod === "new"
-                  ? styles.radioSelected
-                  : {}),
+                ...(paymentMethod === "new" ? styles.radioSelected : {}),
               }}
               onClick={() => setPaymentMethod("new")}
             >
@@ -597,9 +585,7 @@ export default function PaymentPage() {
                 onChange={() => setPaymentMethod("new")}
                 style={{ marginTop: 3 }}
               />
-              <div style={{ fontWeight: 600 }}>
-                New Credit/Debit Card
-              </div>
+              <div style={{ fontWeight: 600 }}>New Credit/Debit Card</div>
             </label>
           </div>
 
@@ -618,7 +604,7 @@ export default function PaymentPage() {
                     const truncated = val.slice(0, 16);
                     const formatted = truncated.replace(
                       /(\d{4})(?=\d)/g,
-                      "$1 ",
+                      "$1 "
                     );
                     setCardNumber(formatted);
                   }}
@@ -695,4 +681,3 @@ export default function PaymentPage() {
     </div>
   );
 }
-
