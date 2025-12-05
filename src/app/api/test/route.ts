@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { movieService, showtimeService, bookingService } from '../../../services/database';
 
-// GET /api/test - Test all database connections and operations
+// GET - Test all database connections and operations
 export async function GET() {
   console.log('API: GET /api/test - Testing database connections and operations');
   
@@ -14,7 +14,7 @@ export async function GET() {
   };
   
   try {
-    // Test Firebase connection by fetching movies
+    // Tests
     console.log('Testing Firebase connection...');
     const movies = await movieService.getAllMovies();
     results.firebase = true;
@@ -22,13 +22,11 @@ export async function GET() {
     console.log('Firebase connection successful');
     console.log(`Found ${movies.length} movies in database`);
     
-    // Test showtimes
     console.log('Testing showtimes...');
     const showtimes = await showtimeService.getAllShowtimes();
     results.showtimes = true;
     console.log(`Found ${showtimes.length} showtimes in database`);
     
-    // Test bookings
     console.log('Testing bookings...');
     const bookings = await bookingService.getAllBookings();
     results.bookings = true;
@@ -64,7 +62,7 @@ export async function GET() {
   }
 }
 
-// POST /api/test - Create sample data for testing
+// POST - Create sample data for testing
 export async function POST(request: NextRequest) {
   console.log('API: POST /api/test - Creating sample data');
   

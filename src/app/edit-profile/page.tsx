@@ -506,7 +506,6 @@ export default function EditProfilePage() {
         </div>
 
         <form style={styles.form} onSubmit={handleSubmit}>
-          {/* Personal Information Section */}
           <div style={styles.section}>
             <h2 style={styles.sectionTitle}>Personal Information</h2>
             
@@ -550,7 +549,6 @@ export default function EditProfilePage() {
             </div>
           </div>
 
-          {/* Address Section */}
           <div style={styles.section}>
             <h2 style={styles.sectionTitle}>Billing Address</h2>
             
@@ -569,7 +567,6 @@ export default function EditProfilePage() {
             </div>
           </div>
 
-          {/* Payment Cards Section */}
           <div style={styles.section}>
             <h2 style={styles.sectionTitle}>Payment Cards</h2>
             
@@ -727,7 +724,6 @@ export default function EditProfilePage() {
             </div>
           </div>
 
-          {/* Password Change Section */}
           <div style={styles.section}>
             <h2 style={styles.sectionTitle}>Security</h2>
             
@@ -799,7 +795,6 @@ export default function EditProfilePage() {
             )}
           </div>
 
-          {/* Preferences Section */}
           <div style={styles.section}>
             <h2 style={styles.sectionTitle}>Preferences</h2>
             
@@ -817,7 +812,6 @@ export default function EditProfilePage() {
             </div>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             style={{
@@ -829,7 +823,6 @@ export default function EditProfilePage() {
             {saving ? "Saving..." : "Save Changes"}
           </button>
 
-          {/* Messages */}
           {error && <div style={{...styles.message, ...styles.error}}>{error}</div>}
           {success && <div style={{...styles.message, ...styles.success}}>{success}</div>}
         </form>

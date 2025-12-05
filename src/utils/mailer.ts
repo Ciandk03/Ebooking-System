@@ -167,6 +167,82 @@ You are receiving this email because you subscribed to promotions. You can updat
   });
 }
 
+export async function sendBookingConfirmationEmail(opts: {
+  to: string;
+  name?: string;
+  bookingId: string;
+  movieTitle?: string;
+  totalPrice: number;
+  seats: string[];
+}) {
+  const { to, name, bookingId, movieTitle, totalPrice, seats } = opts;
+
+  const subject = `Your booking is confirmed – #${bookingId}`;
+
+  const text = `Hi ${name || "there"},
+
+Your booking has been confirmed!
+
+Booking number: ${bookingId}
+Movie: ${movieTitle || "Movie"}
+Seats: ${seats.length ? seats.join(", ") : "N/A"}
+Total: $${totalPrice.toFixed(2)}
+
+Thank you for choosing Cinema E-Booking!`;
+
+  const appUrl = process.env.APP_URL || "";
+  const manageLink = appUrl ? `<a href="${appUrl}/dashboard" style="display:inline-block;padding:10px 18px;margin-top:16px;background:#ba0c2f;color:#ffffff;text-decoration:none;border-radius:999px;font-weight:600;font-size:14px;">View your bookings</a>` : "";
+
+  const html = `
+    <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#050608;padding:24px;">
+      <div style="max-width:560px;margin:0 auto;background:#0b0b0b;border:1px solid #2a2a2a;border-radius:16px;padding:24px;">
+        <h1 style="margin:0 0 8px;color:#ffffff;font-size:22px;letter-spacing:0.3px;">
+          Booking Confirmed 🎟️
+        </h1>
+        <p style="margin:0 0 12px;color:#d1d5db;">
+          Hi ${escapeHtml(name || "there")},
+        </p>
+        <p style="margin:0 0 16px;color:#d1d5db;">
+          Your booking has been successfully processed. Here are your details:
+        </p>
+
+        <div style="background:#050608;border-radius:12px;padding:16px;border:1px solid #2a2a2a;margin-bottom:16px;">
+          <p style="margin:0 0 8px;color:#ffffff;">
+            <strong>Booking number:</strong> ${escapeHtml(bookingId)}
+          </p>
+          ${movieTitle
+      ? `<p style="margin:0 0 8px;color:#d1d5db;"><strong>Movie:</strong> ${escapeHtml(
+        movieTitle
+      )}</p>`
+      : ""
+    }
+          <p style="margin:0 0 8px;color:#d1d5db;">
+            <strong>Seats:</strong> ${seats.length ? escapeHtml(seats.join(", ")) : "N/A"
+    }
+          </p>
+          <p style="margin:0;color:#ffffff;font-weight:600;">
+            <strong>Total:</strong> $${totalPrice.toFixed(2)}
+          </p>
+        </div>
+
+        <p style="margin:0 0 16px;color:#9ca3af;font-size:14px;">
+          You can view or manage your bookings from your account dashboard.
+        </p>
+        ${manageLink}
+      </div>
+    </div>
+  `;
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM!,
+    to,
+    subject,
+    text,
+    html,
+  });
+}
+
+
 
 function escapeHtml(s: string) {
   return s

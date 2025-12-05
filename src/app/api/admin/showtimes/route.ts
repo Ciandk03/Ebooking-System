@@ -4,14 +4,11 @@ import * as firestore from 'firebase/firestore';
 import { db } from '../../../../../lib/firebase';
 import { userService, movieService } from '../../../../services/database';
 
-// Convert "HH:MM" to minutes since midnight
 function timeStringToMinutes(time: string): number {
   const [hh, mm] = time.split(':').map(Number);
   return hh * 60 + mm;
 }
 
-// Check if two time intervals [startA, endA] and [startB, endB] overlap
-// Note: end-to-start touching is allowed; only true overlap is blocked.
 function intervalsOverlap(
   startA: string,
   endA: string,
@@ -23,18 +20,15 @@ function intervalsOverlap(
   const bStart = timeStringToMinutes(startB);
   const bEnd = timeStringToMinutes(endB);
 
-  // Overlap iff each interval starts before the other one ends
   return aStart < bEnd && bStart < aEnd;
 }
 
-// Query Firestore for any conflicting show in the same showroom & date
 async function hasShowtimeConflict(
   showroomId: string,
   dateStr: string,       // "YYYY-MM-DD"
   startTimeStr: string,  // "HH:MM"
   endTimeStr: string,    // "HH:MM"
 ): Promise<boolean> {
-  // If you renamed to showtimesCollection, swap this to that.
   const q = firestore.query(
     showsCollection,
     firestore.where('showroom', '==', showroomId),
@@ -63,10 +57,8 @@ async function hasShowtimeConflict(
 
 export const runtime = 'nodejs';
 
-// Firestore collection for shows (showtimes)
 const showsCollection = firestore.collection(db, 'shows');
 
-// Helper: verify JWT from Authorization header
 /**
 function verifyToken(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
@@ -118,12 +110,11 @@ export async function POST(request: NextRequest) {
     }
     */
 
-    // 2) Parse & validate body
     const body = await request.json();
     const {
       movieId,
       showroomId,
-      startDateTime, // ISO string: 2025-12-24T19:30
+      startDateTime,
       childTicketPrice,
       adultTicketPrice,
       seniorTicketPrice,
@@ -166,7 +157,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3) Load movie (for duration + title)
+    // Load movie
     const movie = await movieService.getMovieById(movieId);
     if (!movie) {
       return NextResponse.json(
@@ -189,7 +180,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4) Load showroom to get seats
+    // Load showroom and get seats
     const showroomRef = firestore.doc(db, 'showrooms', showroomId);
     const showroomSnap = await firestore.getDoc(showroomRef);
 
@@ -214,7 +205,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 5) Compute start / end times
+    // Start-end times
     const start = new Date(startDateTime);
     if (Number.isNaN(start.getTime())) {
       return NextResponse.json(
@@ -226,14 +217,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // end time = start + movie.duration minutes
     const end = new Date(start.getTime() + movie.duration * 60 * 1000);
 
-    const dateStr = start.toISOString().slice(0, 10); // YYYY-MM-DD
-    const startTimeStr = start.toTimeString().slice(0, 5); // HH:MM
-    const endTimeStr = end.toTimeString().slice(0, 5); // HH:MM
+    const dateStr = start.toISOString().slice(0, 10);
+    const startTimeStr = start.toTimeString().slice(0, 5);
+    const endTimeStr = end.toTimeString().slice(0, 5);
 
-    // 5b) Prevent time conflicts in the same showroom
+    // Time conflict handling
     const conflict = await hasShowtimeConflict(
       showroomId,
       dateStr,
@@ -252,7 +242,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 6) Build showtime document in `shows`
+    // Build showtime doc
     const name = `${movie.title} - ${dateStr} ${startTimeStr}`;
 
     const showDoc = {
@@ -271,14 +261,12 @@ export async function POST(request: NextRequest) {
     const showRef = await firestore.addDoc(showsCollection, showDoc);
     const showId = showRef.id;
 
-    // 7) Update movie.shows array with this showtime id
     const movieRef = firestore.doc(db, 'movies', movieId);
     await firestore.updateDoc(movieRef, {
       shows: firestore.arrayUnion(showId),
       updatedAt: firestore.Timestamp.fromDate(new Date()),
     });
 
-    // 8) Update showroom.shows array with this showtime id
     await firestore.updateDoc(showroomRef, {
       shows: firestore.arrayUnion(showId),
     });

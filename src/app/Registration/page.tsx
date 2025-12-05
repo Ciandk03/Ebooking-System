@@ -266,7 +266,6 @@ export default function RegistrationPage() {
             onChange={(e) => setAddress(e.target.value)}
           />
 
-          {/* Promo section */}
           <h3 style={styles.sectionTitle}>Preferences</h3>
           <div style={styles.checkboxContainer}>
             <input
@@ -281,7 +280,6 @@ export default function RegistrationPage() {
             </label>
           </div>
 
-          {/* Payment section */}
           <div style={{ borderTop: `1px solid ${UGA.border}`, paddingTop: 16, marginTop: 8 }}>
             <h3 style={{ color: UGA.white, marginBottom: 16, fontSize: 18, fontWeight: 600 }}>
               Payment Information (Optional)

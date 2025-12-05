@@ -1,4 +1,4 @@
-// Database model interfaces for the ebooking system
+// Types used between database and backend for easier comm
 
 export interface Movie {
   id: string;
@@ -10,7 +10,7 @@ export interface Movie {
   genres: string[];
   currentlyRunning: boolean;
   comingSoon: boolean;
-  duration: number; // in minutes
+  duration: number;
   releaseDate: string;
   cast?: string[];
   director?: string;
@@ -20,11 +20,11 @@ export interface Movie {
 export interface Showtime {
   id: string;
   movieId: string;
-  date: string; // YYYY-MM-DD format
-  time: string; // HH:MM format
+  date: string;
+  startTime: string;
+  endTime: string;
   showroom: string;
-  availableSeats: number;
-  totalSeats: number;
+  availableSeats: string[];
   childTicketPrice: number;
   adultTicketPrice: number;
   seniorTicketPrice: number;
@@ -33,9 +33,10 @@ export interface Showtime {
 }
 
 export interface Booking {
-  showId: string;
+  showtimeId: string;
   userId: string;
-  seats: string[]; // Array of seat numbers like ["A1", "A2", "B5"]
+  movieId: string;
+  seats: string[];
   childTickets: number;
   adultTickets: number;
   seniorTickets: number;
@@ -60,10 +61,10 @@ export interface User {
   email: string;
   name: string;
   phone?: string;
-  password?: string; // Encrypted password
-  address?: string; // Optional address as string
-  payment?: string; // Optional encrypted payment card info (JSON string)
-  subscribeToPromotions?: boolean; // Optional promotions subscription
+  password?: string;
+  address?: string;
+  payment?: string;
+  subscribeToPromotions?: boolean;
   createdAt: Date;
   updatedAt: Date;
   isAdmin: boolean;
@@ -71,29 +72,4 @@ export interface User {
   verificationToken?: string | null;
   verificationExpires?: Date | null;
   verifiedAt?: Date | null;
-}
-
-export interface Theater {
-  name: string;
-  address: string;
-  showrooms: string[];
-}
-
-export interface Showroom {
-  name: string;
-  seats: string[];
-  shows: string[];
-}
-
-export interface Show {
-  name: string;
-  availableSeats: string[];
-  movie: string;
-  showroom: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  adultTicketPrice: number;
-  childTicketPrice: number;
-  seniorTicketPrice: number;
 }

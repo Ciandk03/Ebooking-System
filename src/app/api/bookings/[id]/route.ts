@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { bookingService } from '../../../../services/database';
 
-// PUT /api/bookings/[id] - Update booking status
+// PUT - Update booking status
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }

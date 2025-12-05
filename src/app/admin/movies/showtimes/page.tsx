@@ -98,7 +98,7 @@ export default function CreateShowtimePage() {
         setMovies(moviesData);
         setShowrooms(showroomsData);
 
-        // If there is at least one movie/showroom, preselect them
+        // Preselect showroom if there's only one
         setForm((prev) => ({
           ...prev,
           movieId: prev.movieId || (moviesData[0]?.id ?? ""),
@@ -169,7 +169,7 @@ export default function CreateShowtimePage() {
       setMessage("Showtime created successfully.");
       setError(null);
 
-      // Reset time + date but keep movie/showroom for quick creation
+      // Reset time + date but keep movie/showroom
       setForm((prev) => ({
         ...prev,
         date: "",

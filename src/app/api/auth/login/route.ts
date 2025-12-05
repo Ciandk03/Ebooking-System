@@ -34,7 +34,6 @@ export async function POST(request: NextRequest) {
             }, { status: 401 });
         }
 
-        // Check if user has a password (some users might not have one set)
         if (!user.password) {
             console.log('API: No password set for user:', email);
             return NextResponse.json({
@@ -80,7 +79,7 @@ export async function POST(request: NextRequest) {
 
         console.log('API: Login successful for user:', email);
         
-        // Return user data without sensitive information
+        // Return user data without sensitive info
         const userData = {
             id: user.id,
             name: user.name,

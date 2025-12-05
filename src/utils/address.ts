@@ -14,8 +14,6 @@ export function parseAddress(addressString: string): ParsedAddress {
     return { fullAddress: '' };
   }
 
-  // Simple parsing - in a real app, you might want more sophisticated parsing
-  // This assumes the address is stored as a comma-separated string
   const parts = addressString.split(',').map(part => part.trim());
   
   return {

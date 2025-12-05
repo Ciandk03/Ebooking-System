@@ -123,7 +123,7 @@ const styles: Record<string, React.CSSProperties> = {
     opacity: 0.55,
   },
   seatHoverable: {
-    // used via inline spread when not disabled
+  
   },
   legendRow: {
     display: "flex",
@@ -247,7 +247,7 @@ interface ShowDoc {
   date: string;
   startTime: string;
   endTime: string;
-  availableSeats: string[]; // array like ["A1","A2","B5"...]
+  availableSeats: string[];
   adultTicketPrice: number;
   childTicketPrice: number;
   seniorTicketPrice: number;
@@ -264,7 +264,6 @@ function groupSeatsByRow(seats: string[]) {
   const map = new Map<string, string[]>();
 
   seats.forEach((seat) => {
-    // crude parse: row = first letter(s) before first digit
     const match = seat.match(/^([A-Za-z]+)(\d+)$/);
     const row = match ? match[1] : seat.charAt(0);
     const existing = map.get(row) || [];
@@ -272,7 +271,7 @@ function groupSeatsByRow(seats: string[]) {
     map.set(row, existing);
   });
 
-  // sort rows alphabetically; seats inside row numerically if possible
+  // sort rows alphabetically
   const rows = Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
 
   return rows.map(([rowLabel, rowSeats]) => {
@@ -311,7 +310,7 @@ export default function SeatSelectionPage() {
   const [childCount, setChildCount] = useState(0);
   const [seniorCount, setSeniorCount] = useState(0);
 
-  // Fetch show details using movieId + showId
+  // Fetch show details
   useEffect(() => {
     const load = async () => {
       if (!movieId || !showId) {
@@ -323,7 +322,6 @@ export default function SeatSelectionPage() {
         setLoading(true);
         setError(null);
 
-        // reuse same endpoint as Booking page
         const res = await fetch(`/api/movies/${movieId}/shows`);
         const text = await res.text();
         let json: any;
@@ -346,7 +344,6 @@ export default function SeatSelectionPage() {
           return;
         }
 
-        // normalize availableSeats to an array
         const seats =
           Array.isArray(found.availableSeats) && found.availableSeats.length > 0
             ? found.availableSeats
@@ -386,13 +383,11 @@ export default function SeatSelectionPage() {
           setAllSeats(seats);
           setShowroomName(showroom.name || showroom.id);
         } else {
-          // 🔁 Fallback – still show something, but this *will* collapse seats if used
           setAllSeats(show.availableSeats || []);
           setShowroomName(show.showroom);
         }
       } catch (err) {
         console.error("SeatSelection: failed to load showroom seats", err);
-        // Fallback to avoid blank screen
         setAllSeats(show?.availableSeats || []);
         setShowroomName(show?.showroom || "");
       }
@@ -453,7 +448,7 @@ export default function SeatSelectionPage() {
     }
   };
 
-  const handleConfirmBooking = async () => {
+  const handleCheckout = () => {
     if (!show || !movieId) return;
 
     if (totalTickets === 0) {
@@ -480,64 +475,30 @@ export default function SeatSelectionPage() {
     }
 
     if (!userId) {
-      alert("Please log in to complete your booking.");
       router.push("/Login");
       return;
     }
 
-    try {
-      setBookingLoading(true);
-      setError(null);
-      setInfo(null);
+    // Redirect to Payment page with booking details
+    const params = new URLSearchParams({
+      movieId,
+      showId: show.id,
+      seats: JSON.stringify(selectedSeats),
+      adultTickets: adultCount.toString(),
+      childTickets: childCount.toString(),
+      seniorTickets: seniorCount.toString(),
+      totalPrice: totalPrice.toString(),
+    });
 
-      const body = {
-        userId,
-        movieId,
-        showtimeId: show.id,
-        seats: selectedSeats,
-        adultTickets: adultCount,
-        childTickets: childCount,
-        seniorTickets: seniorCount,
-        totalPrice,
-        status: "confirmed",
-        bookingDate: new Date().toISOString(),
-      };
-
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-
-      const json: BookingResponse = await res.json();
-
-      if (!res.ok || !json.success) {
-        throw new Error(
-          json.error || json.message || "Failed to create booking"
-        );
-      }
-
-      setInfo("Booking confirmed! Redirecting to your dashboard…");
-      // You can change this route if you want a dedicated confirmation page
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 800);
-    } catch (err: any) {
-      console.error("SeatSelection: booking error", err);
-      setError(err?.message || "Failed to complete booking");
-    } finally {
-      setBookingLoading(false);
-    }
+    router.push(`/Payment?${params.toString()}`);
   };
 
   const disabledText =
     !show || totalTickets === 0
       ? "Select tickets and seats to continue"
       : totalTickets !== totalSelectedSeats
-      ? "Ticket count must match selected seats"
-      : "";
+        ? "Ticket count must match selected seats"
+        : "";
 
   return (
     <div style={styles.page}>
@@ -558,7 +519,6 @@ export default function SeatSelectionPage() {
         </header>
 
         <div style={styles.layout}>
-          {/* LEFT: SEAT MAP */}
           <section style={styles.card}>
             <div style={styles.cardTitleRow}>
               <div style={styles.cardTitle}>Seat Map</div>
@@ -653,7 +613,6 @@ export default function SeatSelectionPage() {
             )}
           </section>
 
-          {/* RIGHT: TICKET & SUMMARY */}
           <section style={styles.card}>
             <div style={styles.cardTitleRow}>
               <div style={styles.cardTitle}>Tickets & Summary</div>
@@ -781,14 +740,14 @@ export default function SeatSelectionPage() {
 
               <button
                 type="button"
-                onClick={handleConfirmBooking}
+                onClick={handleCheckout}
                 disabled={!canConfirm}
                 style={{
                   ...styles.primaryButton,
                   ...(!canConfirm ? styles.primaryButtonDisabled : {}),
                 }}
               >
-                {bookingLoading ? "Processing…" : "Confirm Booking"}
+                Checkout
               </button>
             </div>
 

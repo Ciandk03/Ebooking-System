@@ -7,7 +7,6 @@ export const runtime = 'nodejs';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-key-change-in-production';
 
-// Helper function to verify JWT token
 function verifyToken(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -43,7 +42,7 @@ export async function GET(request: NextRequest) {
       }, { status: 404 });
     }
 
-    // Decrypt payment cards for display (masked)
+    // Decrypt payment cards
     let paymentCards: any[] = [];
     if (user.payment) {
       try {
@@ -51,15 +50,14 @@ export async function GET(request: NextRequest) {
         paymentCards = [{
           ...decryptedCard,
           cardNumber: maskCardNumber(decryptedCard.cardNumber),
-          cvv: '***' // Never show CVV
+          cvv: '***'
         }];
       } catch (error) {
         console.error('Error decrypting payment card:', error);
-        // If decryption fails, just show empty array
       }
     }
 
-    // Return user data without sensitive information
+    // Return data without sensitive info
     const userProfile = {
       id: user.id,
       name: user.name,
@@ -126,7 +124,7 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Validate address constraint (max 1 address)
+    // Validate address constraint
     if (address && typeof address !== 'string') {
       return NextResponse.json({
         success: false,
@@ -134,7 +132,7 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Validate payment cards constraint (max 4 cards)
+    // Validate payment cards constraint
     if (paymentCards && Array.isArray(paymentCards) && paymentCards.length > 4) {
       return NextResponse.json({
         success: false,

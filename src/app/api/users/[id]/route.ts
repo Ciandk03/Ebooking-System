@@ -17,7 +17,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
             }, { status: 404 });
         }
         
-        // Decrypt sensitive data if needed
+        // Decrypt sensitive data
         let maskedPayment = undefined;
         if (user.payment) {
             try {
