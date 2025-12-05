@@ -28,7 +28,7 @@ export default function MoviesListPage() {
       </div>
 
       <div style={cardStyle}>
-        <p style={{ color: '#9aa6b2' }}>List of movies currently in the database. Click a title for more details (coming soon).</p>
+        <p style={{ color: '#9aa6b2' }}>List of movies currently in the database.</p>
         {loading ? <p>Loading...</p> : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
             {movies.map(m => (
