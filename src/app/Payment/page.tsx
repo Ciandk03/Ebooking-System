@@ -217,7 +217,8 @@ export default function PaymentPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"saved" | "new">("new");
+  const [paymentMethod, setPaymentMethod] = useState<string>("new");
+  const [saveCard, setSaveCard] = useState(true);
 
   // Promo state
   const [canUsePromotions, setCanUsePromotions] = useState(false);
@@ -281,7 +282,7 @@ export default function PaymentPage() {
             setCanUsePromotions(!!json.data.subscribeToPromotions);
 
             if (json.data.paymentCards && json.data.paymentCards.length > 0) {
-              setPaymentMethod("saved");
+              setPaymentMethod("saved-0");
             }
           }
         } else {
@@ -377,6 +378,44 @@ export default function PaymentPage() {
 
       const seats = seatsStr ? JSON.parse(seatsStr) : [];
 
+      // Handle saving new card
+      if (paymentMethod === "new" && saveCard && user) {
+        try {
+          const newCard = {
+            cardNumber: cardNumber.replace(/\s/g, ""),
+            cardHolderName: cardName,
+            expiryMonth: expiry.split("/")[0],
+            expiryYear: "20" + expiry.split("/")[1],
+            cvv: cvv,
+          };
+
+          const currentCards = user.paymentCards || [];
+          // Avoid duplicates (simple check)
+          const isDuplicate = currentCards.some(
+            (c: any) => c.cardNumber.slice(-4) === newCard.cardNumber.slice(-4)
+          );
+
+          if (!isDuplicate) {
+            const updatedCards = [...currentCards, newCard];
+
+            // Update profile
+            await fetch("/api/users/profile", {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("authToken") || ""}`,
+              },
+              body: JSON.stringify({
+                paymentCards: updatedCards,
+              }),
+            });
+          }
+        } catch (saveErr) {
+          console.error("Payment: failed to save card", saveErr);
+          // Continue with booking even if save fails
+        }
+      }
+
       const body = {
         userId: user.id,
         movieId,
@@ -389,12 +428,12 @@ export default function PaymentPage() {
         status: "confirmed",
         bookingDate: new Date().toISOString(),
         paymentDetails:
-          paymentMethod === "saved"
-            ? { type: "saved" }
+          paymentMethod.startsWith("saved")
+            ? { type: "saved", index: parseInt(paymentMethod.split("-")[1]) }
             : {
-                type: "new",
-                last4: cardNumber.replace(/\s/g, "").slice(-4),
-              },
+              type: "new",
+              last4: cardNumber.replace(/\s/g, "").slice(-4),
+            },
       };
 
       const res = await fetch("/api/bookings", {
@@ -495,7 +534,7 @@ export default function PaymentPage() {
               <span>Sales Tax (9%)</span>
               <span>${(subtotalAfterDiscount * TAX_RATE).toFixed(2)}</span>
             </div>
-            
+
 
             <div style={styles.promoRow}>
               <input
@@ -539,30 +578,30 @@ export default function PaymentPage() {
           {error && <div style={styles.error}>{error}</div>}
 
           <div style={styles.radioGroup}>
-            {hasSavedCard && (
+            {hasSavedCard && user.paymentCards.map((card: any, index: number) => (
               <label
+                key={index}
                 style={{
                   ...styles.radioLabel,
-                  ...(paymentMethod === "saved" ? styles.radioSelected : {}),
+                  ...(paymentMethod === `saved-${index}` ? styles.radioSelected : {}),
                 }}
-                onClick={() => setPaymentMethod("saved")}
+                onClick={() => setPaymentMethod(`saved-${index}`)}
               >
                 <input
                   type="radio"
                   name="paymentMethod"
-                  checked={paymentMethod === "saved"}
-                  onChange={() => setPaymentMethod("saved")}
+                  checked={paymentMethod === `saved-${index}`}
+                  onChange={() => setPaymentMethod(`saved-${index}`)}
                   style={{ marginTop: 3 }}
                 />
                 <div>
-                  <div style={{ fontWeight: 600 }}>Saved Card</div>
+                  <div style={{ fontWeight: 600 }}>Saved Card {index + 1}</div>
                   <div style={styles.muted}>
-                    {user.paymentCards[0].cardNumber} •{" "}
-                    {user.paymentCards[0].cardHolderName}
+                    {card.cardNumber} • {card.cardHolderName}
                   </div>
                 </div>
               </label>
-            )}
+            ))}
 
             <label
               style={{
@@ -648,6 +687,8 @@ export default function PaymentPage() {
                   />
                 </div>
               </div>
+
+
             </div>
           )}
         </section>

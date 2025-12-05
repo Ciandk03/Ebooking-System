@@ -12,7 +12,7 @@ function verifyToken(request: NextRequest) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return null;
   }
-  
+
   const token = authHeader.substring(7);
   try {
     return jwt.verify(token, JWT_SECRET) as { userId: string; email: string; role: string };
@@ -44,7 +44,24 @@ export async function GET(request: NextRequest) {
 
     // Decrypt payment cards
     let paymentCards: any[] = [];
-    if (user.payment) {
+
+    // Handle new array format
+    if (user.paymentMethods && Array.isArray(user.paymentMethods)) {
+      user.paymentMethods.forEach(encryptedCard => {
+        try {
+          const decryptedCard = decryptPaymentCard(encryptedCard);
+          paymentCards.push({
+            ...decryptedCard,
+            cardNumber: maskCardNumber(decryptedCard.cardNumber),
+            cvv: '***'
+          });
+        } catch (error) {
+          console.error('Error decrypting a payment card:', error);
+        }
+      });
+    }
+    // Fallback to old single card format if no array
+    else if (user.payment) {
       try {
         const decryptedCard = decryptPaymentCard(user.payment);
         paymentCards = [{
@@ -67,12 +84,12 @@ export async function GET(request: NextRequest) {
       paymentCards: paymentCards as any[],
       subscribeToPromotions: user.subscribeToPromotions || false,
       isAdmin: user.isAdmin,
-      
+
       role: user.isAdmin ? 'admin' : 'user'
     };
 
     console.log('API: Profile fetched successfully for user:', user.email);
-    
+
     return NextResponse.json({
       success: true,
       data: userProfile,
@@ -184,12 +201,18 @@ export async function PUT(request: NextRequest) {
 
     // Handle payment cards update
     if (paymentCards && Array.isArray(paymentCards)) {
+      const { encryptPaymentCard } = await import('../../../../utils/encryption');
+
       if (paymentCards.length === 0) {
-        updateData.payment = null;
+        updateData.paymentMethods = [];
+        updateData.payment = null; // Clear legacy field too
       } else {
-        // Encrypt the first payment card (we only store one)
-        const { encryptPaymentCard } = await import('../../../../utils/encryption');
-        updateData.payment = encryptPaymentCard(paymentCards[0]);
+        // Encrypt all cards
+        const encryptedCards = paymentCards.map((card: any) => encryptPaymentCard(card));
+        updateData.paymentMethods = encryptedCards;
+
+        // Update legacy field with the first card for backward compatibility
+        updateData.payment = encryptedCards[0];
       }
     }
 

@@ -63,7 +63,8 @@ export interface User {
   phone?: string;
   password?: string;
   address?: string;
-  payment?: string;
+  payment?: string; // @deprecated Use paymentMethods instead
+  paymentMethods?: string[]; // Array of encrypted payment cards
   subscribeToPromotions?: boolean;
   createdAt: Date;
   updatedAt: Date;
